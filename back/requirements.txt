@@ -23,6 +23,7 @@ librosa==0.7.1
 llvmlite==0.30.0
 Markdown==3.1.1
 MarkupSafe==1.1.1
+MIDIUtil==1.2.1
 norbert==0.2.1
 numba==0.46.0
 numpy==1.17.4
