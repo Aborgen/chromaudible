@@ -99,3 +99,6 @@ def getBPM(y: np.ndarray) -> int:
   onsetEnvelope = librosa.onset.onset_strength(y, sampleRate)
   return int(round(librosa.beat.tempo(onsetEnvelope, sampleRate)[0]))
 
+# Normalize melody frequency to a float between 0 and 1
+def normalizeFrequency(freq: float) -> float:
+  return freq - melodyParams['minfqr'] / melodyParams['maxfqr'] - melodyParams['minfqr']
