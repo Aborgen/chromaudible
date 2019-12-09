@@ -2,6 +2,7 @@ import warnings
 # Turn off tensorflow warnings from spleeter library
 warnings.filterwarnings('ignore')
 
+from config import melodyParams
 from config import sampleRate
 from config import tempDir
 import librosa
@@ -59,8 +60,8 @@ def detectVolumeChanges(y: np.ndarray) -> np.ndarray:
 
 # Based on plugin author's notebook:
 # https://github.com/justinsalamon/melodia_python_tutorial/blob/master/melodia_python_tutorial.ipynb
-def extractMelody(y: np.ndarray, bpm: int) -> List[Tuple[float, int]]:
-  melody = vamp.collect(y, sampleRate, "mtg-melodia:melodia")['vector'][1]
+def extractMelody(y: np.ndarray, bpm: int) -> np.ndarray
+  melody = vamp.collect(y, sampleRate, "mtg-melodia:melodia", parameters=melodyParams)['vector'][1]
   timestamps = 8 * 128/44100.0 + np.arange(len(melody)) * (128/44100.0)
   melodyAtTime = [(f, int(round(t * 1000))) for f, t in zip(melody, timestamps)]
   return np.asarray(melodyAtTime)
