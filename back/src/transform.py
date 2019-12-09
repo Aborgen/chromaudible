@@ -63,7 +63,12 @@ def detectVolumeChanges(y: np.ndarray) -> np.ndarray:
 def extractMelody(y: np.ndarray, bpm: int) -> np.ndarray
   melody = vamp.collect(y, sampleRate, "mtg-melodia:melodia", parameters=melodyParams)['vector'][1]
   timestamps = 8 * 128/44100.0 + np.arange(len(melody)) * (128/44100.0)
-  melodyAtTime = [(f, int(round(t * 1000))) for f, t in zip(melody, timestamps)]
+  melodyAtTime = []
+  for f, t in zip(melody, timestamps):
+    frequency = normalizeFrequency(f)
+    ms = int(round(t * 1000))
+    melodyAtTime.append((frequency, ms))
+
   return np.asarray(melodyAtTime)
 
 # Not entirely sure if this does what I need it to. The idea is to get a
