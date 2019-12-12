@@ -87,7 +87,7 @@ def centroid(y: np.ndarray) -> float:
 # As the name implies, return the silence ranges [start, end] that are longer
 # than threshold. On the frontend, there will be some drum track playing
 # continuously except for the time ranges from this function.
-def detectSilence(y: np.ndarray, threshold = 1000) -> np.ndarray:
+def detectSilence(y: np.ndarray, threshold: int = 1000) -> np.ndarray:
   timestamps = librosa.onset.onset_detect(y, sampleRate, units='time')
   timestamps = np.append(timestamps, librosa.get_duration(y, sampleRate))
   timestamps = np.round(timestamps * 1000).astype(int)
