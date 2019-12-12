@@ -5,6 +5,7 @@ warnings.filterwarnings('ignore')
 from config import melodyParams
 from config import sampleRate
 from config import tempDir
+from convert import dBFStoGainAmps
 import librosa
 import numpy as np
 import os
@@ -39,22 +40,27 @@ def isolateAudio(tempFile: str, outDir: Path) -> Tuple[np.ndarray, np.ndarray]:
 
 # The idea is to know at what timestamps(ms) the 'loudness' changes, and
 # what, in mels, it has changed to.
-def detectVolumeChanges(y: np.ndarray) -> np.ndarray:
-  S = librosa.feature.melspectrogram(y, sampleRate, power=1)
-  summedMel = np.round(S.sum(axis=0), 2)
-  timestamps = librosa.core.frames_to_time(np.arange(summedMel.shape[0]), sampleRate)
-
+def detectVolumeChanges(y: np.ndarray, threshold: int = 1000) -> np.ndarray:
+  # Compute power spectrogram
+  SPower = np.abs(librosa.core.stft(y)) ** 2
+  SWeighted = librosa.core.perceptual_weighting(SPower, frequencies=librosa.core.fft_frequencies(sampleRate))
+  gainLevels = dBFStoGainAmps(np.average(SWeighted, axis=0))
+  timestamps = librosa.core.frames_to_time(np.arange(gainLevels.shape[0]), sampleRate)
+  timestamps = np.round(timestamps * 1000).astype(int)
   volumeChanges = []
-  previousMel = 0.0
-  # I am only interested in new mels and their corresponding timestamp:
-  # when does the volume change?
-  for m, t in zip(summedMel, timestamps):
-    if m == 0.0 or m == previousMel:
+  previousGain = gainLevels[0]
+  previousTime = timestamps[0]
+  # Options I came up with to prevent skipping the first timestamp included
+  # this, or enumerating the zip to prevent continuing the loop on index 0.
+  volumeChanges.append((previousGain, previousTime))
+  # I am only interested in new gain values and their corresponding timestamp:
+  # when does the loudness change?
+  for A, t in zip(gainLevels, timestamps):
+    if A == previousGain or t < previousTime + threshold:
       continue
 
-    ms = int(round(t * 1000))
-    volumeChanges.append((round(m, 2), ms))
-    previousMel = m
+    volumeChanges.append((A, t))
+    previousGain, previousTime = A, t
 
   return np.asarray(volumeChanges)
 
