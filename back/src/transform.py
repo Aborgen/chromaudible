@@ -60,7 +60,7 @@ def detectVolumeChanges(y: np.ndarray) -> np.ndarray:
 
 # Based on plugin author's notebook:
 # https://github.com/justinsalamon/melodia_python_tutorial/blob/master/melodia_python_tutorial.ipynb
-def extractMelody(y: np.ndarray, bpm: int) -> np.ndarray
+def extractMelody(y: np.ndarray, bpm: int) -> np.ndarray:
   melody = vamp.collect(y, sampleRate, "mtg-melodia:melodia", parameters=melodyParams)['vector'][1]
   timestamps = 8 * 128/44100.0 + np.arange(len(melody)) * (128/44100.0)
   melodyAtTime = []
@@ -81,7 +81,7 @@ def centroid(y: np.ndarray) -> float:
 # As the name implies, return the silence ranges [start, end] that are longer
 # than threshold. On the frontend, there will be some drum track playing
 # continuously except for the time ranges from this function.
-def detectSilence(y: np.ndarray, threshold = 1000) -> np.ndarray
+def detectSilence(y: np.ndarray, threshold = 1000) -> np.ndarray:
   timestamps = librosa.onset.onset_detect(y, sampleRate, units='time')
   timestamps = np.append(timestamps, librosa.get_duration(y, sampleRate))
   timestamps = np.round(timestamps * 1000).astype(int)
