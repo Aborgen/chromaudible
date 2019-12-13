@@ -25,7 +25,7 @@ def fromAudio(tempFile: str):
     'melody': extractMelody(vocals, bpm),
     'volumeChanges': detectVolumeChanges(vocals),
     'silenceRanges': detectSilence(drums),
-    'melodyFlavor': centroid(vocals)
+    'timbreTexture': getTimbreTexture(vocals)
   }
 
 # Use spleeter to separate audio file into vocals and drums, and then
@@ -77,12 +77,10 @@ def extractMelody(y: np.ndarray, bpm: int) -> np.ndarray:
 
   return np.asarray(melodyAtTime)
 
-# Not entirely sure if this does what I need it to. The idea is to get a
-# sense of the 'quality' (timbre) of the singer's voice as a float. This float
-# will be found within a range, which matches to a synth 'voice' in the frontend.
-def centroid(y: np.ndarray) -> float:
-  centers = librosa.feature.spectral_centroid(y, sampleRate)[0]
-  return centers
+# Averages the spectral centroids over time. The spectral centroid correlates
+# with the 'brightness' of sound
+def getTimbreTexture(y: np.ndarray) -> float:
+  return np.average(librosa.feature.spectral_centroid(y, sampleRate))
 
 # As the name implies, return the silence ranges [start, end] that are longer
 # than threshold. On the frontend, there will be some drum track playing
