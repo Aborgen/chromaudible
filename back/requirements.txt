@@ -13,6 +13,7 @@ gast==0.3.2
 google-pasta==0.1.8
 grpcio==1.25.0
 h5py==2.10.0
+hsluv==0.0.2
 idna==2.8
 itsdangerous==1.1.0
 Jinja2==2.10.3
