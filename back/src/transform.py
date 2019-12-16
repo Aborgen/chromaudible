@@ -4,6 +4,7 @@ warnings.filterwarnings('ignore')
 
 from config import melodyParams
 from config import sampleRate
+from config import timbreBounds
 from config import tempDir
 from convert import dBFStoGainAmps
 import librosa
@@ -81,7 +82,8 @@ def extractMelody(y: np.ndarray, bpm: int) -> np.ndarray:
 # Averages the spectral centroids over time. The spectral centroid correlates
 # with the 'brightness' of sound
 def getTimbreTexture(y: np.ndarray) -> float:
-  return np.average(librosa.feature.spectral_centroid(y, sampleRate))
+  averageTimbre = np.average(librosa.feature.spectral_centroid(y, sampleRate))
+  return normalizeOne(averageTimbre, **timbreBounds)
 
 # As the name implies, return the silence ranges [start, end] that are longer
 # than threshold. On the frontend, there will be some drum track playing
