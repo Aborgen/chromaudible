@@ -2,12 +2,14 @@ import warnings
 # Turn off tensorflow warnings from spleeter library
 warnings.filterwarnings('ignore')
 
+from config import loudnessBounds
 from config import melodyParams
 from config import sampleRate
 from config import timbreBounds
 from config import tempDir
 from convert import dBFStoGainAmps
 from convert import normalizeAll
+from convert import normalizeOne
 import librosa
 import numpy as np
 import os
@@ -46,7 +48,7 @@ def detectVolumeChanges(y: np.ndarray, threshold: int = 1000) -> np.ndarray:
   # Compute power spectrogram
   SPower = np.abs(librosa.core.stft(y)) ** 2
   SWeighted = librosa.core.perceptual_weighting(SPower, frequencies=librosa.core.fft_frequencies(sampleRate))
-  gainLevels = dBFStoGainAmps(np.average(SWeighted, axis=0))
+  gainLevels = normalizeAll(dBFStoGainAmps(np.average(SWeighted, axis=0)), **loudnessBounds)
   timestamps = librosa.core.frames_to_time(np.arange(gainLevels.shape[0]), sampleRate)
   timestamps = np.round(timestamps * 1000).astype(int)
   volumeChanges = []
