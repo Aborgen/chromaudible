@@ -3,7 +3,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 from config import loudnessBounds
-from config import melodyParams
+from config import melodyBounds
 from config import sampleRate
 from config import timbreBounds
 from config import tempDir
@@ -71,7 +71,7 @@ def detectVolumeChanges(y: np.ndarray, threshold: int = 1000) -> np.ndarray:
 # Based on plugin author's notebook:
 # https://github.com/justinsalamon/melodia_python_tutorial/blob/master/melodia_python_tutorial.ipynb
 def extractMelody(y: np.ndarray, bpm: int) -> np.ndarray:
-  params = { 'minfqr': melodyParams['minFreq'], 'maxfqr': melodyParams['maxFreq'] }
+  params = { 'minfqr': melodyBounds['minBound'], 'maxfqr': melodyBounds['maxBound'] }
   melody = vamp.collect(y, sampleRate, "mtg-melodia:melodia", parameters=params)['vector'][1]
   melody = normalizeAll(melody, **melodyBounds)
   timestamps = 8 * 128/44100.0 + np.arange(len(melody)) * (128/44100.0)
