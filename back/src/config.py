@@ -10,6 +10,11 @@ timbreBounds = {
   'newMin'  : 0,     'newMax'  : 1
 }
 
+loudnessBounds = {
+  'minBound': -100.0, 'maxBound': 0,
+  'newMin'  : 0,     'newMax'  : 1
+}
+
 def _init():
   if os.path.exists(tempDir):
     rmtree(tempDir)
