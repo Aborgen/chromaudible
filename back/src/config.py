@@ -4,7 +4,7 @@ from shutil import rmtree
 
 tempDir = Path("../temp")
 sampleRate = 44100
-melodyParams = { 'minfqr': 55.0, 'maxfqr': 800.0 }
+melodyParams = { 'minFreq': 55.0, 'maxFreq': 800.0 }
 def _init():
   if os.path.exists(tempDir):
     rmtree(tempDir)

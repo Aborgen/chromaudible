@@ -67,7 +67,8 @@ def detectVolumeChanges(y: np.ndarray, threshold: int = 1000) -> np.ndarray:
 # Based on plugin author's notebook:
 # https://github.com/justinsalamon/melodia_python_tutorial/blob/master/melodia_python_tutorial.ipynb
 def extractMelody(y: np.ndarray, bpm: int) -> np.ndarray:
-  melody = vamp.collect(y, sampleRate, "mtg-melodia:melodia", parameters=melodyParams)['vector'][1]
+  params = { 'minfqr': melodyParams['minFreq'], 'maxfqr': melodyParams['maxFreq'] }
+  melody = vamp.collect(y, sampleRate, "mtg-melodia:melodia", parameters=params)['vector'][1]
   timestamps = 8 * 128/44100.0 + np.arange(len(melody)) * (128/44100.0)
   melodyAtTime = []
   for f, t in zip(melody, timestamps):
