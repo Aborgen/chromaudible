@@ -7,6 +7,7 @@ from config import sampleRate
 from config import timbreBounds
 from config import tempDir
 from convert import dBFStoGainAmps
+from convert import normalizeAll
 import librosa
 import numpy as np
 import os
@@ -70,12 +71,12 @@ def detectVolumeChanges(y: np.ndarray, threshold: int = 1000) -> np.ndarray:
 def extractMelody(y: np.ndarray, bpm: int) -> np.ndarray:
   params = { 'minfqr': melodyParams['minFreq'], 'maxfqr': melodyParams['maxFreq'] }
   melody = vamp.collect(y, sampleRate, "mtg-melodia:melodia", parameters=params)['vector'][1]
+  melody = normalizeAll(melody, **melodyBounds)
   timestamps = 8 * 128/44100.0 + np.arange(len(melody)) * (128/44100.0)
   melodyAtTime = []
   for f, t in zip(melody, timestamps):
-    frequency = normalizeFrequency(f)
     ms = int(round(t * 1000))
-    melodyAtTime.append((frequency, ms))
+    melodyAtTime.append((f, ms))
 
   return np.asarray(melodyAtTime)
 
@@ -111,6 +112,3 @@ def getBPM(y: np.ndarray) -> int:
   onsetEnvelope = librosa.onset.onset_strength(y, sampleRate)
   return int(round(librosa.beat.tempo(onsetEnvelope, sampleRate)[0]))
 
-# Normalize melody frequency to a float between 0 and 1
-def normalizeFrequency(freq: float) -> float:
-  return freq - melodyParams['minfqr'] / melodyParams['maxfqr'] - melodyParams['minfqr']
