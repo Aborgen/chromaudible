@@ -16,7 +16,7 @@ timbreBounds = {
 
 loudnessBounds = {
   'minBound': -100.0, 'maxBound': 0,
-  'newMin'  : 0,     'newMax'  : 1
+  'newMin'  : 0,      'newMax'  : 1
 }
 
 def _init():
