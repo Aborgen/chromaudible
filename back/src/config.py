@@ -11,12 +11,12 @@ melodyBounds = {
 
 timbreBounds = {
   'minBound': 350.0, 'maxBound': 5000.0,
-  'newMin'  : 0,     'newMax'  : 1
+  'newMin'  : 0,     'newMax'  : 100
 }
 
 loudnessBounds = {
   'minBound': -100.0, 'maxBound': 0,
-  'newMin'  : 0,      'newMax'  : 1
+  'newMin'  : 0,      'newMax'  : 100
 }
 
 def _init():
