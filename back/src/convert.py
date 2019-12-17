@@ -10,11 +10,11 @@ def gainAmpTodBFS(amps: np.ndarray) -> np.ndarray:
   
 def normalizeOne(n: Union[int, float], minBound: Union[int, float], maxBound: Union[int, float], newMin: Union[int, float], newMax: Union[int, float]) -> Union[int, float]:
   n = clampOne(n, minBound, maxBound)
-  return (n - minBound / maxBound - minBound) * (newMax - newMin) + newMin
+  return ((n - minBound) / (maxBound - minBound)) * (newMax - newMin) + newMin
 
 def normalizeAll(arr: np.ndarray, minBound: Union[int, float], maxBound: Union[int, float], newMin: Union[int, float], newMax: Union[int, float]) -> np.ndarray:
   arr = clampAll(arr, minBound, maxBound)
-  return (arr - minBound / maxBound - minBound) * (newMax - newMin) + newMin
+  return ((arr - minBound) / (maxBound - minBound)) * (newMax - newMin) + newMin
 
 def clampOne(n: Union[int, float], minBound: Union[int, float], maxBound: Union[int, float]) -> Union[int, float]:
   return max(minBound, min(maxBound, n))
