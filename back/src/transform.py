@@ -76,8 +76,8 @@ def detectVolumeChanges(y: np.ndarray, threshold: int = 1000) -> Dict[int, float
 def extractMelody(y: np.ndarray, bpm: int) -> np.ndarray:
   params = { 'minfqr': melodyBounds['minBound'], 'maxfqr': melodyBounds['maxBound'] }
   melody = vamp.collect(y, sampleRate, "mtg-melodia:melodia", parameters=params)['vector'][1]
-  melody = normalizeAll(melody, **melodyBounds)
   melody[melody < 0] = 0
+  melody = [normalizeOne(f, **melodyBounds, clamped=False) if f > 0 else 0 for f in melody]
   timestamps = 8 * 128/44100.0 + np.arange(len(melody)) * (128/44100.0)
   timestampsMs = np.round(timestamps * 1000).astype(int)
   melodyAtTime = []
