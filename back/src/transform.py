@@ -45,21 +45,25 @@ def isolateAudio(tempFile: str, outDir: Path) -> Tuple[np.ndarray, np.ndarray]:
 # The idea is to know at what timestamps(ms) the 'loudness' changes, and
 # what, in mels, it has changed to.
 def detectVolumeChanges(y: np.ndarray, threshold: int = 1000) -> np.ndarray:
-  # Compute power spectrogram
+  # Compute power spectrogram, weigh it perceptualy to dBFS values.
   SPower = np.abs(librosa.core.stft(y)) ** 2
   SWeighted = librosa.core.perceptual_weighting(SPower, frequencies=librosa.core.fft_frequencies(sampleRate))
+  # Take the average of each spectrogram bin, convert from dBFS to amps
+  # in the range [-1, +1], and then normalize them using the 
+  # newMin and newMax values in loudnessBounds.
   gainLevels = normalizeAll(dBFStoGainAmps(np.average(SWeighted, axis=0)), **loudnessBounds)
   timestamps = librosa.core.frames_to_time(np.arange(gainLevels.shape[0]), sampleRate)
-  timestamps = np.round(timestamps * 1000).astype(int)
   volumeChanges = []
+  timestampsMs = np.round(timestamps * 1000).astype(int)
   previousGain = gainLevels[0]
-  previousTime = timestamps[0]
+  previousTime = timestampsMs[0]
   # Options I came up with to prevent skipping the first timestamp included
   # this, or enumerating the zip to prevent continuing the loop on index 0.
   volumeChanges.append((previousGain, previousTime))
+  volumeChanges[previousTime] = previousGain
   # I am only interested in new gain values and their corresponding timestamp:
   # when does the loudness change?
-  for A, t in zip(gainLevels, timestamps):
+  for A, t in zip(gainLevels.tolist(), timestampsMs.tolist()):
     if A == previousGain or t < previousTime + threshold:
       continue
 
