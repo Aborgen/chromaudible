@@ -8,6 +8,7 @@ from config import sampleRate
 from config import timbreBounds
 from config import tempDir
 from convert import dBFStoGainAmps
+from convert import melodyPartsToHexColor
 from convert import normalizeAll
 from convert import normalizeOne
 import librosa
@@ -24,13 +25,15 @@ def fromAudio(tempFile: str):
   vocals, drums = isolateAudio(tempFile, outDir)
   os.unlink(tempFile)
   bpm = getBPM(drums)
-  return { 
-    'bpm': bpm,
+  silenceRanges = detectSilence(drums)
+  melodyParts = { 
     'melody': extractMelody(vocals, bpm),
     'volumeChanges': detectVolumeChanges(vocals),
-    'silenceRanges': detectSilence(drums),
     'timbreTexture': getTimbreTexture(vocals)
   }
+
+  hexColors = melodyPartsToHexColor(melodyParts)
+  return hexColors
 
 # Use spleeter to separate audio file into vocals and drums, and then
 # return those same wavelengths
