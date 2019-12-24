@@ -6,7 +6,7 @@ tempDir = Path("../temp")
 sampleRate = 44100
 melodyBounds = {
   'minBound': 55.0, 'maxBound': 1760.0,
-  'newMin'  : 0,    'newMax'  : 360.0
+  'newMin'  : 0.5,  'newMax'  : 360.0
 }
 
 timbreBounds = {
