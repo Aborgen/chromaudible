@@ -77,6 +77,7 @@ def extractMelody(y: np.ndarray, bpm: int) -> np.ndarray:
   params = { 'minfqr': melodyBounds['minBound'], 'maxfqr': melodyBounds['maxBound'] }
   melody = vamp.collect(y, sampleRate, "mtg-melodia:melodia", parameters=params)['vector'][1]
   melody = normalizeAll(melody, **melodyBounds)
+  melody[melody < 0] = 0
   timestamps = 8 * 128/44100.0 + np.arange(len(melody)) * (128/44100.0)
   melodyAtTime = []
   for f, t in zip(melody, timestamps):
