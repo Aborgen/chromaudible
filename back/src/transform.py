@@ -79,10 +79,10 @@ def extractMelody(y: np.ndarray, bpm: int) -> np.ndarray:
   melody = normalizeAll(melody, **melodyBounds)
   melody[melody < 0] = 0
   timestamps = 8 * 128/44100.0 + np.arange(len(melody)) * (128/44100.0)
+  timestampsMs = np.round(timestamps * 1000).astype(int)
   melodyAtTime = []
-  for f, t in zip(melody, timestamps):
-    ms = int(round(t * 1000))
-    melodyAtTime.append((f, ms))
+  for f, t in zip(melody, timestampsMs.tolist()):
+    melodyAtTime.append((t, f))
 
   return np.asarray(melodyAtTime)
 
