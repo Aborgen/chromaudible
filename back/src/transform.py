@@ -73,7 +73,7 @@ def detectVolumeChanges(y: np.ndarray, threshold: int = 1000) -> Dict[int, float
 
 # Based on plugin author's notebook:
 # https://github.com/justinsalamon/melodia_python_tutorial/blob/master/melodia_python_tutorial.ipynb
-def extractMelody(y: np.ndarray, bpm: int) -> np.ndarray:
+def extractMelody(y: np.ndarray, bpm: int) -> List[Tuple[int, float]]:
   params = { 'minfqr': melodyBounds['minBound'], 'maxfqr': melodyBounds['maxBound'] }
   melody = vamp.collect(y, sampleRate, "mtg-melodia:melodia", parameters=params)['vector'][1]
   melody[melody < 0] = 0
@@ -84,7 +84,7 @@ def extractMelody(y: np.ndarray, bpm: int) -> np.ndarray:
   for f, t in zip(melody, timestampsMs.tolist()):
     melodyAtTime.append((t, f))
 
-  return np.asarray(melodyAtTime)
+  return melodyAtTime
 
 # Averages the spectral centroids over time. The spectral centroid correlates
 # with the 'brightness' of sound
