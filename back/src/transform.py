@@ -84,7 +84,12 @@ def extractMelody(y: np.ndarray, bpm: int) -> List[Tuple[int, float]]:
   timestamps = 8 * 128/44100.0 + np.arange(len(melody)) * (128/44100.0)
   timestampsMs = np.round(timestamps * 1000).astype(int)
   melodyAtTime = []
-  for f, t in zip(melody, timestampsMs.tolist()):
+  for i, (f, t) in enumerate(zip(melody, timestampsMs.tolist())):
+    # Due to the inner workings of melodia, the first timestamp is always 24 ms.
+    # I need a key of 0 for timing purposes.
+    if i == 0:
+      melodyAtTime.append((0, f))
+
     melodyAtTime.append((t, f))
 
   return melodyAtTime
