@@ -47,12 +47,7 @@ def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
   l = volumeChanges[sorted(volumeChanges.keys())[0]]
   s = timbreTexture
   colorTimeMap = dict()
-  for i, (t, freq) in enumerate(melody):
-    if i == 0:
-      print(h, l, s)
-      print(hls_to_rgb(h, l, s))
-      print(rgbToHex(hls_to_rgb(h, l, s)))
-
+  for t, freq in melody:
     h = freq
     if t in volumeChanges:
       l = volumeChanges[t]
