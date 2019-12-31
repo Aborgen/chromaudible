@@ -1,5 +1,6 @@
 from config import tempDir
 from colorsys import hls_to_rgb
+from colorsys import rgb_to_hls
 from math import log10
 import numpy as np
 from operator import itemgetter
@@ -56,6 +57,26 @@ def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
   
   return colorTimeMap
 
+def hexColorToMelodyParts(colorTimeMap: Dict[int, str]) -> Dict:
+  melody = []
+  volumeChanges = {}
+  timbreTexture = 0.0
+  lastLightness = 0.0
+  for i,(t, hexColor) in enumerate(colorTimeMap.items()):
+    h, l, s = rgb_to_hls(*hexToRgb(hexColor))
+    if i == 0:
+      timbreTexture = s
+
+    melody.append((t, h))
+    if l != lastLightness:
+      volumeChanges[t] = lastLightness = l
+
+  return {
+    'melody': melody,
+    'volumeChanges': volumeChanges,
+    'timbreTexture': timbreTexture
+  }
+    
 def rgbToHex(rgb: Tuple[float]) -> str:
   r, g, b = quantizeRgb(rgb)
   return '#{:02x}{:02x}{:02x}'.format(r, g, b)
