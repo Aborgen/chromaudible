@@ -66,5 +66,6 @@ def hexToRgb(hexString: str) -> Tuple[int]:
   n = int(hexString[1:], 16)
   b = n % 256.0
   g = (n - b) / 256.0 % 256.0
-  r = (n - b) / 256.0 ** 2 - g / 256.0
-  return (int(r), int(g), int(b))
+  r = (n - b) / 256.0 ** 2 - (g / 256.0)
+  rgb = normalizeAll([int(r), int(g), int(b)], minBound=0, maxBound=255, newMin=0, newMax=1.0)
+  return tuple(rgb)
