@@ -35,6 +35,9 @@ def fromAudio(tempFile: str):
   hexColors = melodyPartsToHexColor(melodyParts)
   return hexColors
 
+def fromImage(tempFile: str):
+  return 'fromImage response'
+
 # Use spleeter to separate audio file into vocals and drums, and then
 # return those same wavelengths
 def isolateAudio(tempFile: str, outDir: Path) -> Tuple[np.ndarray, np.ndarray]:
