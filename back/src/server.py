@@ -7,10 +7,11 @@ from flask import request
 import os
 from tempfile import mkstemp
 from transform import fromAudio
+from transform import fromImage
 
 class EType(Enum):
-  AUDIO  = 'audio'
-  CANVAS = 'canvas'
+  AUDIO = 'audio'
+  IMAGE = 'image'
 
 app = Flask(__name__)
 
@@ -22,12 +23,12 @@ def upload():
   fileIn = saveFile(f, f"{fileBase}_in")
   if uploadType == EType.AUDIO.value:
     return prepareJSON(fromAudio(fileIn))
-  elif uploadType == EType.CANVAS.value:
-    #return fromCanvas(fileIn)
+  elif uploadType == EType.IMAGE.value:
+    return prepareJSON(fromImage(fileIn))
   else:
     msg = ''
     if not uploadType:
-      msg = "To call this route, there must be an argument provided to type [type=audio]"
+      msg = "To call this route, there must be an argument provided to type [type=audio|image]"
     else:
       msg = f"The upload type {uploadType} is not supported"
 
