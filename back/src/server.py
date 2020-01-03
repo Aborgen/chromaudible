@@ -23,7 +23,6 @@ def upload():
   if uploadType == EType.AUDIO.value:
     return prepareJSON(fromAudio(fileIn))
   elif uploadType == EType.CANVAS.value:
-    print()
     #return fromCanvas(fileIn)
   else:
     msg = ''
