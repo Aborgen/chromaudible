@@ -34,6 +34,13 @@ def upload():
 
     raise NotFound(msg)
 
+@app.after_request
+def after_request(response):
+  response.headers.add('Access-Control-Allow-Origin', 'http://localhost:8080')
+  response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+  response.headers.add('Access-Control-Allow-Methods', 'POST')
+  return response
+
 def saveFile(f, filename: str) -> str:
   fileDiscriptor, tempFile = mkstemp(dir=tempDir)
   f.save(tempFile)
