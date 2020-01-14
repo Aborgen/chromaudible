@@ -1,7 +1,7 @@
 <template>
   <form @submit.prevent='handleSubmit' :class="formName + '_form'">
     <label for="upload">{{ inputLabel }}</label>
-    <input name="upload" type="file" :class="formName + '_input'">
+    <input id="upload" name="upload" type="file" :class="formName + '_input'">
     <input type="submit" value="submit">
   </form>
 </template>
