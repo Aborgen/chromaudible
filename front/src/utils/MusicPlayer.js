@@ -41,7 +41,7 @@ class MusicPlayer {
   }
 
   tuneInstrument(hz, timestamp) {
-    if (this.instrument.frequency.value == hz) {
+    if (this.instrument.frequency.value === hz) {
       return;
     }
 
@@ -80,7 +80,7 @@ class MusicPlayer {
     }
     // Context is suspended at construction, freezing currentTime at 0,
     // and enabling scheduling of notes at 0 seconds.
-    if (this.context.state == 'suspended') {
+    if (this.context.state === 'suspended') {
       this.context.resume();
     }
 
