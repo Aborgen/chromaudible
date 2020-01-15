@@ -2,12 +2,12 @@ class MusicPlayer {
   constructor(context, frequencyTimePairs) {
     this.context = context;
     this.frequencyTimePairs = frequencyTimePairs;
-    this.lastTimePair = [];
+    this.lastFrequencyPair = [];
     this.scheduleAhead = 0.1/*s*/;
     this.cooldownPeriod = 25/*ms*/;
     this.isFinished = false;
     this.notePtr = 0;
-    [this.instrument, this.gain] = this.initInstrument();
+    [this.instrument, this.gainNode] = this.initInstrument();
   }
 
   initInstrument() {
@@ -16,11 +16,11 @@ class MusicPlayer {
     osc.frequency.setValueAtTime(0, this.context.currentTime);
     osc.connect(this.context.destination);
     // Initialize oscillator gain
-    const gain = this.context.createGain();
-    gain.gain.setValueAtTime(0.3, this.context.currentTime);
-    osc.connect(gain);
-    gain.connect(this.context.destination);
-    return [osc, gain];
+    const gainNode = this.context.createGain();
+    gainNode.gain.setValueAtTime(0.3, this.context.currentTime);
+    osc.connect(gainNode);
+    gainNode.connect(this.context.destination);
+    return [osc, gainNode];
   }
   
   instrumentOn() {
@@ -37,7 +37,7 @@ class MusicPlayer {
       return;
     }
 
-    this.gain.gain.setTargetAtTime(n, timestamp, 0.015);
+    this.gainNode.gain.setTargetAtTime(n, timestamp, 0.015);
   }
 
   tuneInstrument(hz, timestamp) {
@@ -66,9 +66,9 @@ class MusicPlayer {
     }
 
     let timestamp, hz;
-    if (this.lastTimePair.length != 0) {
-      [timestamp, hz] = this.lastTimePair;
-      this.lastTimePair = [];
+    if (this.lastFrequencyPair.length != 0) {
+      [timestamp, hz] = this.lastFrequencyPair;
+      this.lastFrequencyPair = [];
     }
     else {
       [timestamp, hz] = this.nextNote();
@@ -84,7 +84,7 @@ class MusicPlayer {
       this.context.resume();
     }
 
-    this.lastTimePair = [timestamp, hz];
+    this.lastFrequencyPair = [timestamp, hz];
     window.setTimeout(this.scheduler.bind(this), this.cooldownPeriod);
   }
 
