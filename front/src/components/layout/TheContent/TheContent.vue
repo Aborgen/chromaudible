@@ -1,15 +1,18 @@
 <template>
 <section :class="classFromParent + ' content-container'">
   <header>Time to do the thing</header>
-  <button @click='setAudioMode'>Upload Audio</button>
-  <button @click='setImageMode'>Upload Image</button>
-  <audio-upload v-if="currentMode === ModeEnum.AUDIO" />
-  <div v-else-if="currentMode === ModeEnum.IMAGE">WATCH THIS SPACE</div>
+  <section class='button-group'>
+    <button @click='currentMode = ModeEnum.AUDIO'>Upload Audio</button>
+    <button @click='currentMode = ModeEnum.IMAGE'>Upload Image</button>
+  </section>
+  <audio-upload v-if=     "currentMode === ModeEnum.AUDIO" />
+  <image-upload v-else-if="currentMode === ModeEnum.IMAGE" />
 </section>
 </template>
 
 <script>
 import AudioUpload from './internal/AudioUpload/AudioUpload';
+import ImageUpload from './internal/ImageUpload/ImageUpload';
 import ModeEnum from './internal/misc/ModeEnum';
 
 function setAudioMode() {
@@ -27,7 +30,8 @@ function setImageMode() {
 export default {
   name: 'TheContent',
   components: {
-    AudioUpload
+    AudioUpload,
+    ImageUpload
   },
   data: function() {
     return {
