@@ -6,10 +6,12 @@ class MusicPlayer {
     this.timbreTexture = timbreTexture;
 
     this.lastFrequencyPair = [];
+    this.queuedGainChange = [];
     this.scheduleAhead = 0.1/*s*/;
     this.cooldownPeriod = 25/*ms*/;
     this.isFinished = false;
     this.notePtr = 0;
+    this.gainPtr = 0;
     [this.instrument, this.gainNode] = this.initInstrument();
   }
 
@@ -44,6 +46,11 @@ class MusicPlayer {
   }
 
   tuneInstrument(hz, timestamp) {
+    if (this.queuedGainChange[0] === timestamp) {
+      this.setGain(...this.queuedGainChange);
+      this.queuedGainChange = this.nextGainChange();
+    }
+ 
     if (this.instrument.frequency.value === hz) {
       return;
     }
@@ -59,6 +66,14 @@ class MusicPlayer {
     }
 
     return this.frequencyTimePairs[this.notePtr++];
+  }
+
+  nextGainChange() {
+   if (this.gainPtr >= this.gainTimePairs.length - 1) {
+      return [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
+    }
+
+    return this.gainTimePairs[this.gainPtr++];
   }
 
   // Based on Chris Wilson's metronome scheduler:
