@@ -45,13 +45,16 @@ def quantizeRgb(rgb: Tuple[float]) -> Tuple[int]:
 def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
   melody, volumeChanges, timbreTexture = itemgetter('melody', 'volumeChanges', 'timbreTexture')(melodyParts)
   h = 0.0
-  l = volumeChanges[sorted(volumeChanges.keys())[0]]
+  l = volumeChanges[0][1]
   s = timbreTexture
+  volumePtr = 0
   colorTimeMap = dict()
   for t, freq in melody:
     h = freq
-    if t in volumeChanges:
-      l = volumeChanges[t]
+    volumeT, volumeValue = volumeChanges[volumePtr]
+    if t == volumeT:
+      l = volumeValue
+      ++volumePtr
 
     colorTimeMap[t] = rgbToHex(hls_to_rgb(h, l, s))
   
@@ -59,17 +62,18 @@ def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
 
 def hexColorToMelodyParts(colorTimeMap: Dict[int, str]) -> Dict:
   melody = []
-  volumeChanges = {}
+  volumeChanges = []
   timbreTexture = 0.0
   lastLightness = 0.0
-  for i,(t, hexColor) in enumerate(colorTimeMap.items()):
+  for i, (t, hexColor) in enumerate(colorTimeMap.items()):
     h, l, s = rgb_to_hls(*hexToRgb(hexColor))
     if i == 0:
       timbreTexture = s
 
     melody.append((t, h))
     if l != lastLightness:
-      volumeChanges[t] = lastLightness = l
+      volumeChanges.append((t, l))
+      lastLightness = l
 
   return {
     'melody': melody,

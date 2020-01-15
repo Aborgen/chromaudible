@@ -36,6 +36,10 @@ def fromAudio(tempFile: str):
   return hexColors
 
 def fromImage(tempFile: str):
+  ## Use computer vision to extract hexColors from image
+  # hexColors = extractHexColors(tempFile)
+  # melodyParts = hexColorToMelodyParts(hexColors)
+  # return melodyParts
   return 'fromImage response'
 
 # Use spleeter to separate audio file into vocals and drums, and then
@@ -50,7 +54,7 @@ def isolateAudio(tempFile: str, outDir: Path) -> Tuple[np.ndarray, np.ndarray]:
 
 # The idea is to know at what timestamps(ms) the 'loudness' changes, and
 # what, in mels, it has changed to.
-def detectVolumeChanges(y: np.ndarray, threshold: int = 1000) -> Dict[int, float]:
+def detectVolumeChanges(y: np.ndarray, threshold: int = 1000) -> List[Tuple[float, float]]:
   # Compute power spectrogram, weigh it perceptualy to dBFS values.
   SPower = np.abs(librosa.core.stft(y)) ** 2
   SWeighted = librosa.core.perceptual_weighting(SPower, frequencies=librosa.core.fft_frequencies(sampleRate))
@@ -60,19 +64,19 @@ def detectVolumeChanges(y: np.ndarray, threshold: int = 1000) -> Dict[int, float
   gainLevels = normalizeAll(dBFStoGainAmps(np.average(SWeighted, axis=0)), **loudnessBounds)
   timestamps = librosa.core.frames_to_time(np.arange(gainLevels.shape[0]), sampleRate)
   timestampsMs = np.round(timestamps * 1000).astype(int)
-  volumeChanges = dict()
+  volumeChanges = []
   previousGain = gainLevels[0]
   previousTime = timestampsMs[0]
   # Options I came up with to prevent skipping the first timestamp included
   # this, or enumerating the zip to prevent continuing the loop on index 0.
-  volumeChanges[previousTime] = previousGain
+  volumeChanges.append((previousTime, previousGain))
   # I am only interested in new gain values and their corresponding timestamp:
   # when does the loudness change?
   for A, t in zip(gainLevels.tolist(), timestampsMs.tolist()):
     if A == previousGain or t < previousTime + threshold:
       continue
 
-    volumeChanges[t] = A
+    volumeChanges.append((t, A))
     previousGain, previousTime = A, t
 
   return volumeChanges
