@@ -1,7 +1,7 @@
 <template>
 <section class='audioUpload'>
   <file-form
-    :handleSubmit='playMusic'
+    :handle-submit='convertToImage'
     :input-label='currentLabel'
     form-name='audioUpload'
   />
@@ -10,23 +10,17 @@
 
 <script>
 import FileForm from 'components/FileForm/FileForm';
-import MusicPlayer from 'utils/MusicPlayer';
 
-async function playMusic() {
+async function convertToImage() {
   const audioFile = document.getElementById('upload').files[0];
   const res = await getMelody('http://localhost:5000/upload', audioFile);
   if (!res.ok) {
     throw new Error(res.statusText);
   }
 
-  const melody = await res.json();
-  const context = new AudioContext();
-  context.suspend();
-  const gain = context.createGain();
-  gain.gain.setValueAtTime(0.25, context.currentTime);
-  gain.connect(context.destination);
-  const player = new MusicPlayer(context, melody);
-  player.play();
+  this.currentLabel = 'Obtained melody!';
+  // Result will be an object { timestamp: hexColor }. Will draw a canvas
+  // With this in some way.
 }
 
 async function getMelody(url, audioFile) {
@@ -45,7 +39,7 @@ export default {
     FileForm
   },
   methods: {
-    playMusic
+    convertToImage
   },
   data() {
     return {
