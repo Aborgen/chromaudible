@@ -1,7 +1,10 @@
 class MusicPlayer {
-  constructor(context, frequencyTimePairs) {
+  constructor(context, frequencyTimePairs, gainTimePairs, timbreTexture) {
     this.context = context;
     this.frequencyTimePairs = frequencyTimePairs;
+    this.gainTimePairs = gainTimePairs;
+    this.timbreTexture = timbreTexture;
+
     this.lastFrequencyPair = [];
     this.scheduleAhead = 0.1/*s*/;
     this.cooldownPeriod = 25/*ms*/;
