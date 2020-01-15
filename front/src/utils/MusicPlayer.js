@@ -32,7 +32,7 @@ class MusicPlayer {
     this.instrument = this.initInstrument();
   }
 
-  setGain(n, timestamp) {
+  setGain(timestamp, n) {
     if (n < -1.0 || n > 1.0) {
       return;
     }
