@@ -1,5 +1,6 @@
 absl-py==0.8.1
 astor==0.8.0
+attrs==19.3.0
 audioread==2.1.8
 certifi==2019.9.11
 cffi==1.13.2
@@ -14,6 +15,7 @@ google-pasta==0.1.8
 grpcio==1.25.0
 h5py==2.10.0
 idna==2.8
+importlib-metadata==1.4.0
 itsdangerous==1.1.0
 Jinja2==2.10.3
 joblib==0.14.0
@@ -24,13 +26,19 @@ llvmlite==0.30.0
 Markdown==3.1.1
 MarkupSafe==1.1.1
 MIDIUtil==1.2.1
+more-itertools==8.1.0
 norbert==0.2.1
 numba==0.46.0
 numpy==1.17.4
+packaging==20.0
 pandas==0.25.1
 pkg-resources==0.0.0
+pluggy==0.13.1
 protobuf==3.10.0
+py==1.8.1
 pycparser==2.19
+pyparsing==2.4.6
+pytest==5.3.4
 python-dateutil==2.8.1
 pytz==2019.3
 requests==2.22.0
@@ -46,5 +54,7 @@ tensorflow-estimator==1.14.0
 termcolor==1.1.0
 urllib3==1.25.7
 vamp==1.1.0
+wcwidth==0.1.8
 Werkzeug==0.16.0
 wrapt==1.11.2
+zipp==2.0.0
