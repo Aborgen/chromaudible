@@ -18,11 +18,17 @@ def normalizeOne(n: Union[int, float], minBound: Union[int, float], maxBound: Un
 
   return ((n - minBound) / (maxBound - minBound)) * (newMax - newMin) + newMin
 
+def denormalizeOne(normalizedN: float, minBound: Union[int, float], maxBound: Union[int, float], newMin: Union[int, float], newMax: Union[int, float]) -> Union[int, float]:
+  return ((normalizedN - newMin) / (newMax - newMin)) * (maxBound - minBound) + minBound
+
 def normalizeAll(arr: np.ndarray, minBound: Union[int, float], maxBound: Union[int, float], newMin: Union[int, float], newMax: Union[int, float], clamped: bool = True) -> np.ndarray:
   if clamped:
     arr = clampAll(arr, minBound, maxBound)
 
   return ((arr - minBound) / (maxBound - minBound)) * (newMax - newMin) + newMin
+
+def denormalizeAll(normalizedArr: List[float], minBound: Union[int, float], maxBound: Union[int, float], newMin: Union[int, float], newMax: Union[int, float]) -> List[Union[int, float]]:
+  return [denormalizeOne(normN, minBound, maxBound, newMin, newMax) for normN in normalizedArr]
 
 def clampOne(n: Union[int, float], minBound: Union[int, float], maxBound: Union[int, float]) -> Union[int, float]:
   return max(minBound, min(maxBound, n))
