@@ -2,15 +2,11 @@ import warnings
 # Turn off tensorflow warnings from spleeter library
 warnings.filterwarnings('ignore')
 
-from config import loudnessBounds
 from config import melodyBounds
 from config import sampleRate
-from config import timbreBounds
 from config import tempDir
 from convert import dBFStoGainAmps
 from convert import melodyPartsToHexColor
-from convert import normalizeAll
-from convert import normalizeOne
 import librosa
 import numpy as np
 import os
@@ -58,10 +54,8 @@ def detectVolumeChanges(y: np.ndarray, threshold: float = 1.0) -> List[Tuple[flo
   # Compute power spectrogram, weigh it perceptualy to dBFS values.
   SPower = np.abs(librosa.core.stft(y)) ** 2
   SWeighted = librosa.core.perceptual_weighting(SPower, frequencies=librosa.core.fft_frequencies(sampleRate))
-  # Take the average of each spectrogram bin, convert from dBFS to amps
-  # in the range [-1, +1], and then normalize them using the 
-  # newMin and newMax values in loudnessBounds.
-  gainLevels = normalizeAll(dBFStoGainAmps(np.average(SWeighted, axis=0)), **loudnessBounds)
+  # Take the average of each spectrogram bin, convert from dBFS to amps in the range [-1, +1]
+  gainLevels = dBFStoGainAmps(np.average(SWeighted, axis=0))
   timestamps = librosa.core.frames_to_time(np.arange(gainLevels.shape[0]), sampleRate)
   volumeChanges = []
   previousGain = gainLevels[0]
@@ -85,8 +79,6 @@ def detectVolumeChanges(y: np.ndarray, threshold: float = 1.0) -> List[Tuple[flo
 def extractMelody(y: np.ndarray, bpm: int) -> List[Tuple[int, float]]:
   params = { 'minfqr': melodyBounds['minBound'], 'maxfqr': melodyBounds['maxBound'] }
   melody = vamp.collect(y, sampleRate, "mtg-melodia:melodia", parameters=params)['vector'][1]
-  melody[melody < 0] = 0
-  melody = [normalizeOne(f, **melodyBounds, clamped=False) if f > 0 else 0 for f in melody]
   timestamps = 8 * 128/44100.0 + np.arange(len(melody)) * (128/44100.0)
   melodyAtTime = []
   for i, (f, t) in enumerate(zip(melody.tolist(), timestamps.tolist())):
@@ -103,7 +95,7 @@ def extractMelody(y: np.ndarray, bpm: int) -> List[Tuple[int, float]]:
 # with the 'brightness' of sound
 def getTimbreTexture(y: np.ndarray) -> float:
   averageTimbre = np.average(librosa.feature.spectral_centroid(y, sampleRate))
-  return normalizeOne(averageTimbre, **timbreBounds)
+  return averageTimbre
 
 # As the name implies, return the silence ranges [start, end] that are longer
 # than threshold. On the frontend, there will be some drum track playing
