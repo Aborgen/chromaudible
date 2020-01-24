@@ -1,4 +1,3 @@
-from config import tempDir
 from .config import loudnessBounds
 from .config import melodyBounds
 from .config import tempDir
