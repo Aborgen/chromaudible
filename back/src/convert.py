@@ -36,17 +36,13 @@ def clampOne(n: Union[int, float], minBound: Union[int, float], maxBound: Union[
 def clampAll(arr: np.ndarray, minBound: Union[int, float], maxBound: Union[int, float]) -> np.ndarray:
   return np.clip(arr, minBound, maxBound)
  
-def quantizeRgb(rgb: Tuple[float]) -> Tuple[int]:
-  intRgb = []
-  for n in rgb:
-    assert 0 <= n <= 1.0
-    n = int(clampOne(n, minBound=0, maxBound=1.0) * 256.0)
-    if n == 256:
-      n = 255
+def normalizeRgb(rgb: Tuple[int]) -> Tuple[float]:
+  return tuple(normalizeAll(list(rgb), minBound=0, maxBound=255, newMin=0, newMax=1.0))
 
-    intRgb.append(n)
+def denormalizeRgb(rgb: Tuple[float]) -> Tuple[int]:
+  denorm = denormalizeAll(list(rgb), minBound=0, maxBound=255, newMin=0, newMax=1.0)
+  return tuple([round(n) for n in denorm])
 
-  return tuple(intRgb)
 
 def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
   melody, volumeChanges, timbreTexture = itemgetter('melody', 'volumeChanges', 'timbreTexture')(melodyParts)
@@ -88,7 +84,7 @@ def hexColorToMelodyParts(colorTimeMap: Dict[int, str]) -> Dict:
   }
     
 def rgbToHex(rgb: Tuple[float]) -> str:
-  r, g, b = quantizeRgb(rgb)
+  r, g, b = denormalizeRgb(rgb)
   return '#{:02x}{:02x}{:02x}'.format(r, g, b)
 
 # Based off of terrygarcia's stackexchange answer:
