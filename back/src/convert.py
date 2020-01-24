@@ -43,6 +43,11 @@ def denormalizeRgb(rgb: Tuple[float]) -> Tuple[int]:
   denorm = denormalizeAll(list(rgb), minBound=0, maxBound=255, newMin=0, newMax=1.0)
   return tuple([round(n) for n in denorm])
 
+def hlsToRgb(hls: Tuple[float, float, float]) -> Tuple[float, float, float]:
+  return hls_to_rgb(*hls)
+
+def rgbToHls(rgb: Tuple[float, float, float]) -> Tuple[float, float, float]:
+  return rgb_to_hls(*rgb)
 
 def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
   melody, volumeChanges, timbreTexture = itemgetter('melody', 'volumeChanges', 'timbreTexture')(melodyParts)
@@ -58,7 +63,7 @@ def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
       l = volumeValue
       ++volumePtr
 
-    colorTimeMap[t] = rgbToHex(hls_to_rgb(h, l, s))
+    colorTimeMap[t] = hlsToHex((h, l, s))
   
   return colorTimeMap
 
@@ -68,7 +73,7 @@ def hexColorToMelodyParts(colorTimeMap: Dict[int, str]) -> Dict:
   timbreTexture = 0.0
   lastLightness = 0.0
   for i, (t, hexColor) in enumerate(colorTimeMap.items()):
-    h, l, s = rgb_to_hls(*hexToRgb(hexColor))
+    h, l, s = hexToHls(hexColor)
     if i == 0:
       timbreTexture = s
 
@@ -87,6 +92,9 @@ def rgbToHex(rgb: Tuple[float]) -> str:
   r, g, b = denormalizeRgb(rgb)
   return '#{:02x}{:02x}{:02x}'.format(r, g, b)
 
+def hlsToHex(hls: Tuple[float, float, float]) -> Tuple[float, float, float]:
+  return rgbToHex(hlsToRgb(hls))
+
 # Based off of terrygarcia's stackexchange answer:
 # https://stackoverflow.com/a/57777266
 def hexToRgb(hexString: str) -> Tuple[int]:
@@ -96,3 +104,6 @@ def hexToRgb(hexString: str) -> Tuple[int]:
   r = (n - b) / 256.0 ** 2 - (g / 256.0)
   rgb = normalizeRgb((r, g, b))
   return rgb
+
+def hexToHls(hexString: str) -> Tuple[int]:
+  return rgbToHls((hexToRgb(hexString)))
