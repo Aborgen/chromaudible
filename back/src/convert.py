@@ -3,7 +3,6 @@ from colorsys import hls_to_rgb
 from colorsys import rgb_to_hls
 from math import log10
 import numpy as np
-from operator import itemgetter
 from typing import Dict, List, Tuple, Union
 
 def dBFStoGainAmps(dBs: np.ndarray) -> np.ndarray:
@@ -43,6 +42,24 @@ def denormalizeRgb(rgb: Tuple[float]) -> Tuple[int]:
   denorm = denormalizeAll(list(rgb), minBound=0, maxBound=255, newMin=0, newMax=1.0)
   return tuple([round(n) for n in denorm])
 
+def normalizeMelody(melody: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
+  return [(t, normalizeOne(f, **melodyBounds, clamped=False)) if f > 0 else (t, 0) for t, f in melody]
+
+def denormalizeMelody(normalizedMelody: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
+  return [(t, denormalizeOne(fPrime, **melodyBounds)) if fPrime > 0 else (t, 0) for t, fPrime in normalizedMelody]
+
+def normalizeVolume(volumeChanges: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
+  return [(t, normalizeOne(A, **loudnessBounds)) for t, A in volumeChanges]
+
+def denormalizeVolume(normalizedVolumeChanges: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
+  return [(t, denormalizeOne(APrime, **loudnessBounds)) for t, APrime in normalizedVolumeChanges]
+
+def normalizeTimbre(timbreTexture: float) -> float:
+  return normalizeOne(timbreTexture, **timbreBounds);
+
+def denormalizeTimbre(normalizedTimbreTexture: float) -> float:
+  return denormalizeOne(normalizedTimbreTexture, **timbreBounds);
+
 def hlsToRgb(hls: Tuple[float, float, float]) -> Tuple[float, float, float]:
   return hls_to_rgb(*hls)
 
@@ -50,7 +67,10 @@ def rgbToHls(rgb: Tuple[float, float, float]) -> Tuple[float, float, float]:
   return rgb_to_hls(*rgb)
 
 def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
-  melody, volumeChanges, timbreTexture = itemgetter('melody', 'volumeChanges', 'timbreTexture')(melodyParts)
+  melody = normalizeMelody(melodyParts['melody'])
+  volumeChanges = normalizeVolume(melodyParts['volumeChanges'])
+  timbreTexture = normalizeTimbre(melodyParts['timbreTexture'])
+
   h = 0.0
   l = volumeChanges[0][1]
   s = timbreTexture
@@ -83,9 +103,9 @@ def hexColorToMelodyParts(colorTimeMap: Dict[int, str]) -> Dict:
       lastLightness = l
 
   return {
-    'melody': melody,
-    'volumeChanges': volumeChanges,
-    'timbreTexture': timbreTexture
+    'melody': denormalizeMelody(melody),
+    'volumeChanges': denormalizeVolume(volumeChanges),
+    'timbreTexture': denormalizeTimbre(timbreTexture)
   }
     
 def rgbToHex(rgb: Tuple[float]) -> str:
