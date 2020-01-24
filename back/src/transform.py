@@ -54,7 +54,7 @@ def isolateAudio(tempFile: str, outDir: Path) -> Tuple[np.ndarray, np.ndarray]:
 
 # The idea is to know at what timestamps(ms) the 'loudness' changes, and
 # what, in mels, it has changed to.
-def detectVolumeChanges(y: np.ndarray, threshold: int = 1000) -> List[Tuple[float, float]]:
+def detectVolumeChanges(y: np.ndarray, threshold: float = 1.0) -> List[Tuple[float, float]]:
   # Compute power spectrogram, weigh it perceptualy to dBFS values.
   SPower = np.abs(librosa.core.stft(y)) ** 2
   SWeighted = librosa.core.perceptual_weighting(SPower, frequencies=librosa.core.fft_frequencies(sampleRate))
@@ -63,16 +63,15 @@ def detectVolumeChanges(y: np.ndarray, threshold: int = 1000) -> List[Tuple[floa
   # newMin and newMax values in loudnessBounds.
   gainLevels = normalizeAll(dBFStoGainAmps(np.average(SWeighted, axis=0)), **loudnessBounds)
   timestamps = librosa.core.frames_to_time(np.arange(gainLevels.shape[0]), sampleRate)
-  timestampsMs = np.round(timestamps * 1000).astype(int)
   volumeChanges = []
   previousGain = gainLevels[0]
-  previousTime = timestampsMs[0]
+  previousTime = timestamps[0]
   # Options I came up with to prevent skipping the first timestamp included
   # this, or enumerating the zip to prevent continuing the loop on index 0.
   volumeChanges.append((previousTime, previousGain))
   # I am only interested in new gain values and their corresponding timestamp:
   # when does the loudness change?
-  for A, t in zip(gainLevels.tolist(), timestampsMs.tolist()):
+  for A, t in zip(gainLevels.tolist(), timestamps.tolist()):
     if A == previousGain or t < previousTime + threshold:
       continue
 
@@ -89,9 +88,8 @@ def extractMelody(y: np.ndarray, bpm: int) -> List[Tuple[int, float]]:
   melody[melody < 0] = 0
   melody = [normalizeOne(f, **melodyBounds, clamped=False) if f > 0 else 0 for f in melody]
   timestamps = 8 * 128/44100.0 + np.arange(len(melody)) * (128/44100.0)
-  timestampsMs = np.round(timestamps * 1000).astype(int)
   melodyAtTime = []
-  for i, (f, t) in enumerate(zip(melody, timestampsMs.tolist())):
+  for i, (f, t) in enumerate(zip(melody.tolist(), timestamps.tolist())):
     # Due to the inner workings of melodia, the first timestamp is always 24 ms.
     # I need a key of 0 for timing purposes.
     if i == 0:
