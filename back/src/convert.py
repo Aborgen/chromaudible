@@ -106,7 +106,7 @@ def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
   timbreTexture = normalizeTimbre(melodyParts['timbreTexture'])
 
   h = 0.0
-  l = volumeChanges[0][1]
+  l = 0.0
   s = timbreTexture
   volumePtr = 0
   colorTimeMap = dict()
