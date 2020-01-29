@@ -144,11 +144,10 @@ def hexColorToMelodyParts(colorTimeMap: Dict[int, List[str]]) -> Dict:
 
 # Based off of terrygarcia's stackexchange answer:
 # https://stackoverflow.com/a/57777266
-def hexToRgb(hexString: str) -> Tuple[int]:
+def hexToRgb(hexString: str) -> Tuple[float, float, float]:
   n = int(hexString[1:], 16)
   b = n % 256.0
   g = (n - b) / 256.0 % 256.0
   r = (n - b) / 256.0 ** 2 - (g / 256.0)
-  rgb = normalizeRgb((r, g, b))
-  return rgb
+  return (int(r), int(g), int(b))
 
