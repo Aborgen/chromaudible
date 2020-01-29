@@ -151,3 +151,21 @@ def hexToRgb(hexString: str) -> Tuple[float, float, float]:
   r = (n - b) / 256.0 ** 2 - (g / 256.0)
   return (int(r), int(g), int(b))
 
+# The original rgb[0.0-1.0] data has been converted into a group of hex color
+# strings. This function performs the reverse of that operation.
+def reconstructRgb(hexStringGroup: List[str]) -> Tuple[float, float, float]:
+  rgbList = [hexToRgb(hexString) for hexString in hexStringGroup]
+  # The rgb[0-255] tuples have been stored in order of information contained,
+  # with the rgbList[0] containing the greatest amount. The last one added
+  # will be scaled to [0.0-1.0] and be added to the rgbList[n-1]th integer rgb
+  # tuple, and so on.
+  integerRgbList = rgbList[:-1]
+  decimalRgb = normalizeRgb(rgbList[-1])
+  for integerRgb in reversed(integerRgbList):
+    # Add itemwise, integer + decimal: r + r, g + g, b + b
+    decimalRgb = normalizeRgb(tuple(a + b for a, b in zip(integerRgb, decimalRgb)))
+
+  # decimalRgb is now in the form that it was originally before having
+  # denormalizeRgb applied to it.
+  return decimalRgb
+
