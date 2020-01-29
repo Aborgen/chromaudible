@@ -4,6 +4,7 @@ from shutil import rmtree
 
 tempDir = Path("../temp")
 sampleRate = 44100
+denormalizeRgbPasses = 5
 melodyBounds = {
   'minBound': 55.0, 'maxBound': 1760.0,
   'newMin'  : 0.05,  'newMax'  : 1.0

@@ -1,3 +1,4 @@
+from .config import denormalizeRgbPasses
 from .config import loudnessBounds
 from .config import melodyBounds
 from .config import tempDir
@@ -5,6 +6,7 @@ from .config import timbreBounds
 from colorsys import hls_to_rgb
 from colorsys import rgb_to_hls
 from math import log10
+from math import modf
 import numpy as np
 from typing import Dict, List, Tuple, Union
 
@@ -41,9 +43,27 @@ def clampAll(arr: np.ndarray, minBound: Union[int, float], maxBound: Union[int, 
 def normalizeRgb(rgb: Tuple[int]) -> Tuple[float]:
   return tuple(normalizeAll(list(rgb), minBound=0, maxBound=255, newMin=0, newMax=1.0))
 
-def denormalizeRgb(rgb: Tuple[float]) -> Tuple[int]:
-  denorm = denormalizeAll(list(rgb), minBound=0, maxBound=255, newMin=0, newMax=1.0)
-  return tuple([round(n) for n in denorm])
+# The purpose of this function is to scale from rgb[0.0-1.0] to rgb[0, 255].
+# This process would normally result in the loss of data, since the common ways
+# of accomplishing this goal involves either rounding or flooring each component
+# into ints.
+#
+# Therefore, the solution I came up with is to perform multiple passes over the
+# original rgb tuple, storing the information to the right of the decimal in
+# additional integer rgb tuples. The larger the number of passes, the more
+# accurate the data being preserved. The tradeoff is, of course, more colors
+# being sent to the client. This process is reversed in reconstructRgb.
+def denormalizeRgb(rgb: Tuple[float, float, float]) -> List[Tuple[int, int, int]]:
+  l = []
+  currentRgb = list(rgb)
+  for _ in range(denormalizeRgbPasses):
+    denorm = denormalizeAll(currentRgb, minBound=0, maxBound=255, newMin=0, newMax=1.0)
+    decimalRgb, integerRgb = zip(*[modf(n) for n in denorm])
+    integerRgb = tuple(int(n) for n in integerRgb)
+    l.append(integerRgb)
+    currentRgb = list(decimalRgb)
+
+  return l
 
 def normalizeMelody(melody: List[Tuple[float, float]]) -> List[Tuple[float, float]]:
   return [(t, normalizeOne(f, **melodyBounds, clamped=False)) if f > 0 else (t, 0) for t, f in melody]
@@ -69,6 +89,11 @@ def hlsToRgb(hls: Tuple[float, float, float]) -> Tuple[float, float, float]:
 def rgbToHls(rgb: Tuple[float, float, float]) -> Tuple[float, float, float]:
   return rgb_to_hls(*rgb)
 
+# Given an rgb[0.0-1.0] tuple, return a list of hex color strings
+def rgbToHex(rgb: Tuple[float, float, float]) -> List[str]:
+  # denormalizeRgb returns a list of rgb[0-255] tuples
+  return [f'#{r:02x}{g:02x}{b:02x}' for r, g, b in denormalizeRgb(rgb)]
+
 def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
   melody = normalizeMelody(melodyParts['melody'])
   volumeChanges = normalizeVolume(melodyParts['volumeChanges'])
@@ -90,13 +115,13 @@ def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
   
   return colorTimeMap
 
-def hexColorToMelodyParts(colorTimeMap: Dict[int, str]) -> Dict:
+def hexColorToMelodyParts(colorTimeMap: Dict[int, List[str]]) -> Dict:
   melody = []
   volumeChanges = []
   timbreTexture = 0.0
   lastLightness = 0.0
-  for i, (t, hexColor) in enumerate(colorTimeMap.items()):
-    h, l, s = hexToHls(hexColor)
+  for i, (t, hexStringGroup) in enumerate(colorTimeMap.items()):
+    h, l, s = hexToHls(hexStringGroup)
     if i == 0:
       timbreTexture = s
 
@@ -110,10 +135,6 @@ def hexColorToMelodyParts(colorTimeMap: Dict[int, str]) -> Dict:
     'volumeChanges': denormalizeVolume(volumeChanges),
     'timbreTexture': denormalizeTimbre(timbreTexture)
   }
-    
-def rgbToHex(rgb: Tuple[float]) -> str:
-  r, g, b = denormalizeRgb(rgb)
-  return '#{:02x}{:02x}{:02x}'.format(r, g, b)
 
 def hlsToHex(hls: Tuple[float, float, float]) -> Tuple[float, float, float]:
   return rgbToHex(hlsToRgb(hls))
