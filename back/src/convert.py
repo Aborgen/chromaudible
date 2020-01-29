@@ -115,7 +115,7 @@ def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
     volumeT, volumeValue = volumeChanges[volumePtr]
     if t == volumeT:
       l = volumeValue
-      ++volumePtr
+      volumePtr += 1
 
     colorTimeMap[t] = hlsToHex((h, l, s))
   
