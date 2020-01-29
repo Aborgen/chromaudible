@@ -94,6 +94,12 @@ def rgbToHex(rgb: Tuple[float, float, float]) -> List[str]:
   # denormalizeRgb returns a list of rgb[0-255] tuples
   return [f'#{r:02x}{g:02x}{b:02x}' for r, g, b in denormalizeRgb(rgb)]
 
+def hlsToHex(hls: Tuple[float, float, float]) -> List[str]:
+  return rgbToHex(hlsToRgb(hls))
+
+def hexToHls(hexStringGroup: List[str]) -> Tuple[float, float, float]:
+  return rgbToHls(reconstructRgb(hexStringGroup))
+
 def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
   melody = normalizeMelody(melodyParts['melody'])
   volumeChanges = normalizeVolume(melodyParts['volumeChanges'])
@@ -136,9 +142,6 @@ def hexColorToMelodyParts(colorTimeMap: Dict[int, List[str]]) -> Dict:
     'timbreTexture': denormalizeTimbre(timbreTexture)
   }
 
-def hlsToHex(hls: Tuple[float, float, float]) -> Tuple[float, float, float]:
-  return rgbToHex(hlsToRgb(hls))
-
 # Based off of terrygarcia's stackexchange answer:
 # https://stackoverflow.com/a/57777266
 def hexToRgb(hexString: str) -> Tuple[int]:
@@ -149,5 +152,3 @@ def hexToRgb(hexString: str) -> Tuple[int]:
   rgb = normalizeRgb((r, g, b))
   return rgb
 
-def hexToHls(hexString: str) -> Tuple[int]:
-  return rgbToHls((hexToRgb(hexString)))
