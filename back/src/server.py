@@ -1,13 +1,13 @@
-from config import tempDir
+from .config import tempDir
 from enum import Enum
-from exceptions.NotFound import NotFound
+from .exceptions.NotFound import NotFound
 from flask import Flask
 from flask import jsonify
 from flask import request
 import os
 from tempfile import mkstemp
-from transform import fromAudio
-from transform import fromImage
+from .transform import fromAudio
+from .transform import fromImage
 
 class EType(Enum):
   AUDIO = 'audio'

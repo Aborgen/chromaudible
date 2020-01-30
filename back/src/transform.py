@@ -2,11 +2,11 @@ import warnings
 # Turn off tensorflow warnings from spleeter library
 warnings.filterwarnings('ignore')
 
-from config import melodyBounds
-from config import sampleRate
-from config import tempDir
-from convert import dBFStoGainAmps
-from convert import melodyPartsToHexColor
+from .config import melodyBounds
+from .config import sampleRate
+from .config import tempDir
+from .convert import dBFStoGainAmps
+from .convert import melodyPartsToHexColor
 import librosa
 import numpy as np
 import os
