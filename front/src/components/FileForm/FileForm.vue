@@ -1,7 +1,7 @@
 <template>
-  <form :class="formName + '_form'" method='POST' :action='action'>
+  <form @submit.prevent='handleSubmit' :class="formName + '_form'">
     <label for="upload">{{ inputLabel }}</label>
-    <input name="upload" type="file" :class="formName + '_input'">
+    <input id="upload" name="upload" type="file" :class="formName + '_input'">
     <input type="submit" value="submit">
   </form>
 </template>
@@ -10,6 +10,10 @@
 export default {
   name: 'FileForm',
   props: {
+    handleSubmit: {
+      type: Function,
+      required: true
+    },
     formName: {
       type: String,
       required: true
@@ -17,11 +21,6 @@ export default {
     inputLabel: {
       type: String,
       required: true
-    },
-    action: {
-      type: String,
-      required: true,
-      default: '#'
     }
   }
 }
