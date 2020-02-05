@@ -3,6 +3,7 @@
   <file-form
     :handle-submit='convertToImage'
     :input-label='currentLabel'
+    :form-disabled='formDisabled'
     form-name='audioUpload'
   />
 </section>

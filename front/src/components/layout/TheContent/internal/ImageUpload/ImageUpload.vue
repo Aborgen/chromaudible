@@ -1,8 +1,9 @@
 <template>
 <section class='imageUpload'>
   <file-form
-    :handleSubmit='playImage'
+    :handle-submit='playImage'
     :input-label='currentLabel'
+    :form-disabled='formDisabled'
     form-name='imageUpload'
   />
 </section>
@@ -14,6 +15,7 @@ import FileForm from 'components/FileForm/FileForm';
 
 async function playImage() {
   const imageFile = document.getElementById('upload').files[0];
+  this.formDisabled = true;
   const res = await uploadImage('http://localhost:5000/upload', imageFile);
   if (!res.ok) {
     throw new Error(res.statusText);
@@ -21,6 +23,7 @@ async function playImage() {
 
   const text = await res.json();
   this.currentLabel = text;
+  this.formDisabled = false;
   /*
   const { melody, volumeChanges, timbreTexture } = await res.json();
   const context = new AudioContext();
@@ -53,7 +56,8 @@ export default {
   },
   data() {
     return {
-      currentLabel: "Upload your image!"
+      currentLabel: "Upload your image!",
+      formDisabled: false
     }
   }
 }
