@@ -7,7 +7,9 @@
     form-name='audioUpload'
   />
   <canvas-save v-if='canvasMounted === true'
-               :draw-function='drawCanvas'
+               :width=500
+               :height=500
+               :draw-function='canvasDrawFunction'
                :download-props="{ name: 'audio-canvas', text: 'Download Audio Canvas' }"
     />
 </section>
@@ -16,25 +18,30 @@
 <script>
 import CanvasSave from 'components/CanvasSave/CanvasSave';
 import FileForm from 'components/FileForm/FileForm';
+import { spiral, calculateSpiralPeak } from 'utils/Spiral';
 
-/* eslint-disable no-unused-vars, no-console*/
 async function convertToImage() {
   const audioFile = document.getElementById('upload').files[0];
   this.formDisabled = true;
-  await delay(2000);
-//  const res = await getMelody('http://localhost:5000/upload', audioFile);
-//  if (!res.ok) {
-//    throw new Error(res.statusText);
-//  }
+  const res = await getColors('http://localhost:5000/upload', audioFile);
+  if (!res.ok) {
+    this.currentLabel = 'There was an issue connecting to the server';
+    throw new Error(res.statusText);
+  }
 
+  const pointColors = await res.json();
   this.currentLabel = 'Obtained melody!';
+  this.canvasDrawFunction = (canvas) => {
+    const a = pointColors;
+    const b = this.canvasBackground;
+    return drawCanvas(canvas, a, b);
+  };
+
   this.canvasMounted = true;
   this.formDisabled = false;
-  // Result will be an object { timestamp: hexColor }. Will draw a canvas
-  // With this in some way.
 }
 
-async function getMelody(url, audioFile) {
+async function getColors(url, audioFile) {
   let data = new FormData();
   data.append('type', 'audio');
   data.append('file', audioFile);
@@ -44,35 +51,26 @@ async function getMelody(url, audioFile) {
   });
 }
 
-async function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+function drawCanvas(canvas, pointArray, background) {
+  const context = canvas.getContext('2d');
+  const separationBetweenPoints = 1;
+  const separationBetweenRings = 20;
+  const margin = 10;
+  const numberOfArms = 5;
+  const peak = calculateSpiralPeak(pointArray.length, separationBetweenPoints, separationBetweenRings, margin);
+
+  canvas.width = peak;
+  canvas.height = peak;
+  const origin = {
+    x: canvas.width / 2,
+    y: canvas.height / 2
+  };
+
+  context.fillStyle = background;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  spiral(canvas, origin, pointArray, separationBetweenPoints, separationBetweenRings, numberOfArms);
 }
 
-function drawCanvas(canvas) {
-  const ctx = canvas.getContext('2d');
-  // Draw background
-  ctx.fillStyle = this.canvasBackground;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  // Draw spiral, just temporary
-  const centerX = ctx.canvas.width / 2;
-  const centerY = ctx.canvas.height / 2;
-  ctx.moveTo(centerX, centerY);
-  ctx.beginPath();
-  const a = 3;
-  const b = a;
-  for (let i = 0; i < 720; i += 0.1) {
-    const angle = 0.1 * i;
-    const x = centerX + (a + b * angle) * Math.cos(angle);
-    const y = centerY + (a + b * angle) * Math.sin(angle);
-    ctx.lineTo(x, y);
-  }
-
-  ctx.strokeStyle = "#000000";
-  ctx.stroke();
-  console.log('CANVAS DRAWN');
-}
-
-/* eslint-enable no-unused-vars, no-console */
 export default {
   name: 'AudioUpload',
   components: {
@@ -86,7 +84,8 @@ export default {
   data() {
     return {
       currentLabel: "Upload your music!",
-      canvasBackground: '#ffffff',
+      canvasBackground: '#000000',
+      canvasDrawFunction: function() {},
       canvasMounted: false,
       formDisabled: false
     }
