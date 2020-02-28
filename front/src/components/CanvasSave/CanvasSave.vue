@@ -1,19 +1,28 @@
 <template>
 <section class='canvasDownload'>
-  <canvas id='canvasView' width=500 height=500></canvas>
+  <canvas id='canvasView' :width='width' :height='height'></canvas>
+  <canvas id='realCanvas'></canvas>
   <a id='canvasAnchor' :download="downloadProps.name + '.png'">{{ downloadProps.text }}</a>
 </section>
 </template>
-
 <script>
-function linkCanvas(canvas) {
-  return canvas.toDataURL('image/png');
-}
 
 function drawCanvas(drawFunction) {
-  const canvas = document.getElementById('canvasView');
+  const canvas = document.getElementById('realCanvas');
   drawFunction(canvas);
-  document.getElementById('canvasAnchor').href = linkCanvas(canvas);
+  generateThumbnail(canvas);
+  linkCanvas(canvas);
+}
+
+function generateThumbnail(canvas) {
+  const thumbnail = document.getElementById('canvasView');
+  thumbnail.getContext('2d').drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, thumbnail.width, thumbnail.height);
+}
+
+function linkCanvas(canvas) {
+  const data = canvas.toDataURL('image/png');
+  const a = document.getElementById('canvasAnchor');
+  a.href = data;
 }
 
 export default {
@@ -27,6 +36,14 @@ export default {
       type: Object,
       required: true
     },
+    width: {
+      type: Number,
+      required: true
+    },
+    height: {
+      type: Number,
+      required: true
+    },
   },
   mounted() {
     drawCanvas(this.drawFunction);
@@ -34,8 +51,18 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
   #canvasView {
     border: 2px solid #000000;
+    display: block;
+  }
+
+  #realCanvas {
+    border: 2px solid #000000;
+    display: none;
+  }
+
+  #canvasAnchor {
+    display: block;
   }
 </style>
