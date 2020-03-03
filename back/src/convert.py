@@ -8,7 +8,7 @@ from colorsys import rgb_to_hls
 from math import log10
 from math import modf
 import numpy as np
-from typing import Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Tuple, Union
 
 def dBFStoGainAmps(dBs: np.ndarray) -> np.ndarray:
   return np.round(10 ** (dBs / 20), 2)
@@ -109,8 +109,13 @@ def hlsToIntRgb(hls: Tuple[float, float, float]) -> List[Tuple[int, int, int]]:
 def intRgbToHls(intRgbGroup: List[Tuple[int, int, int]]) -> Tuple[float, float, float]:
   return rgbToHls(reconstructRgb(intRgbGroup))
 
+def melodyPartsToColor(melodyParts: Dict) -> List[Tuple[int, int, int]]:
+  return _melodyPartsLoop(melodyParts, hlsToIntRgb)
 
-def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
+def melodyPartsToHexColor(melodyParts: Dict) -> List[str]:
+  return _melodyPartsLoop(melodyParts, hlsToHex)
+
+def _melodyPartsLoop(melodyParts: Dict, convertFunc: Callable) -> List[Tuple[int, int, int]]:
   melody = normalizeMelody(melodyParts['melody'])
   volumeChanges = normalizeVolume(melodyParts['volumeChanges'])
   timbreTexture = normalizeTimbre(melodyParts['timbreTexture'])
@@ -119,17 +124,19 @@ def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
   l = 0.0
   s = timbreTexture
   volumePtr = 0
-  colorTimeMap = dict()
+  colorPoints = []
   for t, freq in melody:
     h = freq
-    volumeT, volumeValue = volumeChanges[volumePtr]
-    if t == volumeT:
-      l = volumeValue
-      volumePtr += 1
+    if volumePtr < len(volumeChanges):
+      volumeT, volumeValue = volumeChanges[volumePtr]
+      if t == volumeT:
+        l = volumeValue
+        volumePtr += 1
 
-    colorTimeMap[t] = hlsToHex((h, l, s))
-  
-  return colorTimeMap
+    colorPoints.append(convertFunc((h, l, s)))
+
+  return colorPoints
+
 
 def hexColorToMelodyParts(colorTimeMap: Dict[int, List[str]]) -> Dict:
   melody = []
