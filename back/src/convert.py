@@ -137,14 +137,21 @@ def _melodyPartsLoop(melodyParts: Dict, convertFunc: Callable) -> List[Tuple[int
 
   return colorPoints
 
+def colorToMelodyParts(colorPointGroups: List[List[Tuple[int, int, int]]]) -> Dict:
+  return _reverseMelodyPartsLoop(colorPointGroups, intRgbToHls)
 
-def hexColorToMelodyParts(colorTimeMap: Dict[int, List[str]]) -> Dict:
+def hexColorToMelodyParts(hexColorGroups: List[List[str]]) -> Dict:
+  return _reverseMelodyPartsLoop(hexColorGroups, hexToHls)
+
+def _reverseMelodyPartsLoop(colorPointGroups: List, convertFunc: Callable) -> Dict:
   melody = []
   volumeChanges = []
   timbreTexture = 0.0
   lastLightness = 0.0
-  for i, (t, hexStringGroup) in enumerate(colorTimeMap.items()):
-    h, l, s = hexToHls(hexStringGroup)
+  timestamps = 8 * 128/44100.0 + np.arange(len(colorPointGroups)-1) * (128/44100.0)
+  timestamps = np.insert(timestamps, 0, 0)
+  for i, (t, colorPoints) in enumerate(zip(timestamps, colorPointGroups)):
+    h, l, s = convertFunc(colorPoints)
     if i == 0:
       timbreTexture = s
 
