@@ -8,7 +8,7 @@ from colorsys import rgb_to_hls
 from math import log10
 from math import modf
 import numpy as np
-from typing import Dict, List, Tuple, Union
+from typing import Callable, Dict, List, Tuple, Union
 
 def dBFStoGainAmps(dBs: np.ndarray) -> np.ndarray:
   return np.round(10 ** (dBs / 20), 2)
@@ -94,13 +94,28 @@ def rgbToHex(rgb: Tuple[float, float, float]) -> List[str]:
   # denormalizeRgb returns a list of rgb[0-255] tuples
   return [f'#{r:02x}{g:02x}{b:02x}' for r, g, b in denormalizeRgb(rgb)]
 
+def rgbToIntRgb(rgb: Tuple[float, float, float]) -> List[Tuple[int, int, int]]:
+  return denormalizeRgb(rgb)
+
 def hlsToHex(hls: Tuple[float, float, float]) -> List[str]:
   return rgbToHex(hlsToRgb(hls))
 
 def hexToHls(hexStringGroup: List[str]) -> Tuple[float, float, float]:
-  return rgbToHls(reconstructRgb(hexStringGroup))
+  return rgbToHls(reconstructRgb_hexVariant(hexStringGroup))
 
-def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
+def hlsToIntRgb(hls: Tuple[float, float, float]) -> List[Tuple[int, int, int]]:
+  return rgbToIntRgb(hlsToRgb(hls))
+
+def intRgbToHls(intRgbGroup: List[Tuple[int, int, int]]) -> Tuple[float, float, float]:
+  return rgbToHls(reconstructRgb(intRgbGroup))
+
+def melodyPartsToColor(melodyParts: Dict) -> List[Tuple[int, int, int]]:
+  return _melodyPartsLoop(melodyParts, hlsToIntRgb)
+
+def melodyPartsToHexColor(melodyParts: Dict) -> List[str]:
+  return _melodyPartsLoop(melodyParts, hlsToHex)
+
+def _melodyPartsLoop(melodyParts: Dict, convertFunc: Callable) -> List[Tuple[int, int, int]]:
   melody = normalizeMelody(melodyParts['melody'])
   volumeChanges = normalizeVolume(melodyParts['volumeChanges'])
   timbreTexture = normalizeTimbre(melodyParts['timbreTexture'])
@@ -109,25 +124,34 @@ def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
   l = 0.0
   s = timbreTexture
   volumePtr = 0
-  colorTimeMap = dict()
+  colorPoints = []
   for t, freq in melody:
     h = freq
-    volumeT, volumeValue = volumeChanges[volumePtr]
-    if t == volumeT:
-      l = volumeValue
-      volumePtr += 1
+    if volumePtr < len(volumeChanges):
+      volumeT, volumeValue = volumeChanges[volumePtr]
+      if t == volumeT:
+        l = volumeValue
+        volumePtr += 1
 
-    colorTimeMap[t] = hlsToHex((h, l, s))
-  
-  return colorTimeMap
+    colorPoints.append(convertFunc((h, l, s)))
 
-def hexColorToMelodyParts(colorTimeMap: Dict[int, List[str]]) -> Dict:
+  return colorPoints
+
+def colorToMelodyParts(colorPointGroups: List[List[Tuple[int, int, int]]]) -> Dict:
+  return _reverseMelodyPartsLoop(colorPointGroups, intRgbToHls)
+
+def hexColorToMelodyParts(hexColorGroups: List[List[str]]) -> Dict:
+  return _reverseMelodyPartsLoop(hexColorGroups, hexToHls)
+
+def _reverseMelodyPartsLoop(colorPointGroups: List, convertFunc: Callable) -> Dict:
   melody = []
   volumeChanges = []
   timbreTexture = 0.0
   lastLightness = 0.0
-  for i, (t, hexStringGroup) in enumerate(colorTimeMap.items()):
-    h, l, s = hexToHls(hexStringGroup)
+  timestamps = 8 * 128/44100.0 + np.arange(len(colorPointGroups)-1) * (128/44100.0)
+  timestamps = np.insert(timestamps, 0, 0)
+  for i, (t, colorPoints) in enumerate(zip(timestamps, colorPointGroups)):
+    h, l, s = convertFunc(colorPoints)
     if i == 0:
       timbreTexture = s
 
@@ -151,16 +175,15 @@ def hexToRgb(hexString: str) -> Tuple[float, float, float]:
   r = (n - b) / 256.0 ** 2 - (g / 256.0)
   return (int(r), int(g), int(b))
 
-# The original rgb[0.0-1.0] data has been converted into a group of hex color
-# strings. This function performs the reverse of that operation.
-def reconstructRgb(hexStringGroup: List[str]) -> Tuple[float, float, float]:
-  rgbList = [hexToRgb(hexString) for hexString in hexStringGroup]
+# The original rgb[0.0-1.0] data has been converted into a group of rgb[0-255].
+# This function performs the reverse of that operation.
+def reconstructRgb(intRgbGroup: List[Tuple[int, int, int]]) -> Tuple[float, float, float]:
   # The rgb[0-255] tuples have been stored in order of information contained,
-  # with the rgbList[0] containing the greatest amount. The last one added
-  # will be scaled to [0.0-1.0] and be added to the rgbList[n-1]th integer rgb
+  # with the intRgbGroup[0] containing the greatest amount. The last one added
+  # will be scaled to [0.0-1.0] and be added to the intRgbGroup[n-1]th integer rgb
   # tuple, and so on.
-  integerRgbList = rgbList[:-1]
-  decimalRgb = normalizeRgb(rgbList[-1])
+  integerRgbList = intRgbGroup[:-1]
+  decimalRgb = normalizeRgb(intRgbGroup[-1])
   for integerRgb in reversed(integerRgbList):
     # Add itemwise, integer + decimal: r + r, g + g, b + b
     decimalRgb = normalizeRgb(tuple(a + b for a, b in zip(integerRgb, decimalRgb)))
@@ -169,3 +192,6 @@ def reconstructRgb(hexStringGroup: List[str]) -> Tuple[float, float, float]:
   # denormalizeRgb applied to it.
   return decimalRgb
 
+def reconstructRgb_hexVariant(hexStringGroup: List[str]) -> Tuple[float, float, float]:
+  intRgbGroup = [hexToRgb(hexString) for hexString in hexStringGroup]
+  return reconstructRgb(intRgbGroup)
