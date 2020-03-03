@@ -94,11 +94,21 @@ def rgbToHex(rgb: Tuple[float, float, float]) -> List[str]:
   # denormalizeRgb returns a list of rgb[0-255] tuples
   return [f'#{r:02x}{g:02x}{b:02x}' for r, g, b in denormalizeRgb(rgb)]
 
+def rgbToIntRgb(rgb: Tuple[float, float, float]) -> List[Tuple[int, int, int]]:
+  return denormalizeRgb(rgb)
+
 def hlsToHex(hls: Tuple[float, float, float]) -> List[str]:
   return rgbToHex(hlsToRgb(hls))
 
 def hexToHls(hexStringGroup: List[str]) -> Tuple[float, float, float]:
-  return rgbToHls(reconstructRgb(hexStringGroup))
+  return rgbToHls(reconstructRgb_hexVariant(hexStringGroup))
+
+def hlsToIntRgb(hls: Tuple[float, float, float]) -> List[Tuple[int, int, int]]:
+  return rgbToIntRgb(hlsToRgb(hls))
+
+def intRgbToHls(intRgbGroup: List[Tuple[int, int, int]]) -> Tuple[float, float, float]:
+  return rgbToHls(reconstructRgb(intRgbGroup))
+
 
 def melodyPartsToHexColor(melodyParts: Dict) -> Dict[int, str]:
   melody = normalizeMelody(melodyParts['melody'])
@@ -151,16 +161,15 @@ def hexToRgb(hexString: str) -> Tuple[float, float, float]:
   r = (n - b) / 256.0 ** 2 - (g / 256.0)
   return (int(r), int(g), int(b))
 
-# The original rgb[0.0-1.0] data has been converted into a group of hex color
-# strings. This function performs the reverse of that operation.
-def reconstructRgb(hexStringGroup: List[str]) -> Tuple[float, float, float]:
-  rgbList = [hexToRgb(hexString) for hexString in hexStringGroup]
+# The original rgb[0.0-1.0] data has been converted into a group of rgb[0-255].
+# This function performs the reverse of that operation.
+def reconstructRgb(intRgbGroup: List[Tuple[int, int, int]]) -> Tuple[float, float, float]:
   # The rgb[0-255] tuples have been stored in order of information contained,
-  # with the rgbList[0] containing the greatest amount. The last one added
-  # will be scaled to [0.0-1.0] and be added to the rgbList[n-1]th integer rgb
+  # with the intRgbGroup[0] containing the greatest amount. The last one added
+  # will be scaled to [0.0-1.0] and be added to the intRgbGroup[n-1]th integer rgb
   # tuple, and so on.
-  integerRgbList = rgbList[:-1]
-  decimalRgb = normalizeRgb(rgbList[-1])
+  integerRgbList = intRgbGroup[:-1]
+  decimalRgb = normalizeRgb(intRgbGroup[-1])
   for integerRgb in reversed(integerRgbList):
     # Add itemwise, integer + decimal: r + r, g + g, b + b
     decimalRgb = normalizeRgb(tuple(a + b for a, b in zip(integerRgb, decimalRgb)))
@@ -169,3 +178,6 @@ def reconstructRgb(hexStringGroup: List[str]) -> Tuple[float, float, float]:
   # denormalizeRgb applied to it.
   return decimalRgb
 
+def reconstructRgb_hexVariant(hexStringGroup: List[str]) -> Tuple[float, float, float]:
+  intRgbGroup = [hexToRgb(hexString) for hexString in hexStringGroup]
+  return reconstructRgb(intRgbGroup)
