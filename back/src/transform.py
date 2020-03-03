@@ -6,7 +6,7 @@ from .config import melodyBounds
 from .config import sampleRate
 from .config import tempDir
 from .convert import dBFStoGainAmps
-from .convert import melodyPartsToHexColor
+from .convert import melodyPartsToColor
 import librosa
 import numpy as np
 import os
@@ -28,8 +28,8 @@ def fromAudio(tempFile: str):
     'timbreTexture': getTimbreTexture(vocals)
   }
 
-  hexColors = melodyPartsToHexColor(melodyParts)
-  return hexColors
+  colors = melodyPartsToColor(melodyParts)
+  return colors
 
 def fromImage(tempFile: str):
   ## Use computer vision to extract hexColors from image
