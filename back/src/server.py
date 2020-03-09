@@ -24,7 +24,7 @@ def upload():
   if uploadType == EType.AUDIO.value:
     return prepareJSON(fromAudio(fileIn))
   elif uploadType == EType.IMAGE.value:
-    return prepareJSON(fromImage(fileIn))
+    return prepareJSON(fromImage(f))
   else:
     msg = ''
     if not uploadType:

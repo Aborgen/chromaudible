@@ -5,8 +5,10 @@ warnings.filterwarnings('ignore')
 from .config import melodyBounds
 from .config import sampleRate
 from .config import tempDir
+from .convert import colorToMelodyParts
 from .convert import dBFStoGainAmps
 from .convert import melodyPartsToColor
+from .extract import extractImage
 import librosa
 import numpy as np
 import os
@@ -15,6 +17,7 @@ from spleeter.separator import Separator
 from tempfile import mkdtemp
 from typing import Dict, List, Tuple
 import vamp
+from werkzeug.datastructures import FileStorage
 
 def fromAudio(tempFile: str):
   outDir = Path(mkdtemp(dir=tempDir))
@@ -31,12 +34,14 @@ def fromAudio(tempFile: str):
   colors = melodyPartsToColor(melodyParts)
   return colors
 
-def fromImage(tempFile: str):
+def fromImage(f: FileStorage):
   ## Use computer vision to extract hexColors from image
   # hexColors = extractHexColors(tempFile)
   # melodyParts = hexColorToMelodyParts(hexColors)
   # return melodyParts
-  return 'fromImage response'
+  colors = extractImage(f)
+  melodyParts = colorToMelodyParts(colors)
+  return melodyParts
 
 # Use spleeter to separate audio file into vocals and drums, and then
 # return those same wavelengths
