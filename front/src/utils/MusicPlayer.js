@@ -1,5 +1,5 @@
 class MusicPlayer {
-  constructor(context, frequencyTimePairs, gainTimePairs, timbreTexture) {
+  constructor(context, frequencyTimePairs, gainTimePairs, timbreTexture, cleanupFunction) {
     this.context = context;
     this.frequencyTimePairs = frequencyTimePairs;
     this.gainTimePairs = gainTimePairs;
@@ -13,6 +13,7 @@ class MusicPlayer {
     this.notePtr = 0;
     this.gainPtr = 0;
     [this.instrument, this.gainNode] = this.initInstrument();
+    this.closeOnTime(cleanupFunction);
   }
 
   initInstrument() {
@@ -34,7 +35,7 @@ class MusicPlayer {
 
   instrumentOff() {
     this.instrument.stop(this.context.currentTime);
-    this.instrument = this.initInstrument();
+    [this.instrument, this.gainNode] = this.initInstrument();
   }
 
   setGain(timestamp, n) {
@@ -50,18 +51,17 @@ class MusicPlayer {
       this.setGain(...this.queuedGainChange);
       this.queuedGainChange = this.nextGainChange();
     }
- 
+
     if (this.instrument.frequency.value === hz) {
       return;
     }
 
     this.instrument.frequency.setValueAtTime(hz, timestamp);
   }
-  
+
   nextNote() {
     if (this.notePtr >= this.frequencyTimePairs.length - 1) {
       this.isFinished = true;
-      this.instrumentOff();
       return [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
     }
 
@@ -104,6 +104,18 @@ class MusicPlayer {
 
     this.lastFrequencyPair = [timestamp, hz];
     window.setTimeout(this.scheduler.bind(this), this.cooldownPeriod);
+  }
+
+  closeOnTime(cleanupFunction) {
+    const stopTime = this.frequencyTimePairs[this.frequencyTimePairs.length - 1][0];
+    const i = setInterval(() => {
+      if (this.context.currentTime >= stopTime) {
+        clearInterval(i);
+        this.instrumentOff();
+        this.context.close();
+        cleanupFunction();
+      }
+    }, 1000);
   }
 
   play() {
