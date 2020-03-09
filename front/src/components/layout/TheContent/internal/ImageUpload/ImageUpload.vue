@@ -11,39 +11,47 @@
 
 <script>
 import FileForm from 'components/FileForm/FileForm';
-//import MusicPlayer from 'utils/MusicPlayer';
+import MusicPlayer from 'utils/MusicPlayer';
 
-async function playImage() {
+function playImage() {
   const imageFile = document.getElementById('upload').files[0];
   this.formDisabled = true;
-  const res = await uploadImage('http://localhost:5000/upload', imageFile);
-  if (!res.ok) {
-    throw new Error(res.statusText);
-  }
+  this.currentLabel = 'Awaiting response from server...';
+  uploadImage('http://localhost:5000/upload', imageFile).then(((res) => {
+    this.currentLabel = 'Playing image';
+    doIt(res, this);
+  }).bind(this));
+}
 
-  const text = await res.json();
-  this.currentLabel = text;
-  this.formDisabled = false;
-  /*
-  const { melody, volumeChanges, timbreTexture } = await res.json();
+function doIt(res, that) {
+  const { melody, volumeChanges, timbreTexture } = res;
   const context = new AudioContext();
   context.suspend();
   const gain = context.createGain();
   gain.gain.setValueAtTime(0.25, context.currentTime);
   gain.connect(context.destination);
-  const player = new MusicPlayer(context, melody, volumeChanges, timbreTexture);
+  const player = new MusicPlayer(context, melody, volumeChanges, timbreTexture, () => {
+    that.currentLabel = 'JOB DONE';
+    that.formDisabled = false;
+  });
+
   player.play();
-  */
 }
 
 async function uploadImage(url, imageFile) {
   let data = new FormData();
   data.append('type', 'image');
   data.append('file', imageFile);
-  return await fetch(url, {
+  const res = await fetch(url, {
     method: 'POST',
     body: data
   });
+
+  if (!res.ok) {
+    throw new Error(res.statusText);
+  }
+
+  return await res.json();
 }
 
 export default {
