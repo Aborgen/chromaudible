@@ -1,5 +1,5 @@
 <template>
-<section class='imageUpload'>
+<section class='interative-item image-upload'>
   <file-form
     :handle-submit='playImage'
     :input-label='currentLabel'
@@ -10,6 +10,7 @@
 </template>
 
 <script>
+import fetchCatch from 'utils/FetchCatch';
 import FileForm from 'components/FileForm/FileForm';
 import MusicPlayer from 'utils/MusicPlayer';
 
@@ -71,3 +72,11 @@ export default {
 }
 </script>
 
+<style scoped>
+  .image-upload {
+    display: flex;
+    flex-flow: column nowrap;
+    width: 70%;
+    height: 80%;
+  }
+</style>
