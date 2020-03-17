@@ -9,13 +9,16 @@
     accepted-types='image/*'
     form-name='image-upload'
   />
+  <music-controls v-if='readyPlay'
+    :alertWhenFinished='resetState.bind(this)'
+    :melodyParts='melodyParts' />
 </section>
 </template>
 
 <script>
 import fetchCatch from 'utils/FetchCatch';
 import FileForm from 'components/FileForm/FileForm';
-import MusicPlayer from 'utils/MusicPlayer';
+import MusicControls from './internal/MusicControls';
 
 function resetState(stopTrying=false, parentMessage='') {
   if (stopTrying) {
@@ -32,7 +35,11 @@ async function playImage() {
   if (this.formDisabled) {
     return;
   }
-  
+
+  if (this.readyPlay) {
+    this.readyPlay = false;
+  }
+
   const input = document.getElementById('upload');
   if (input.files.length === 0) {
     this.currentLabel = 'Please choose an image to submit';
@@ -60,7 +67,9 @@ async function playImage() {
     return;
   }
 
-  player.play();
+  this.melodyParts = await res.json();
+  this.readyPlay = true;
+  this.currentLabel = 'Ready to play';
 }
 
 async function uploadImage(url, imageFile) {
@@ -71,26 +80,37 @@ async function uploadImage(url, imageFile) {
     method: 'POST',
     body: data
   });
-
-  if (!res.ok) {
-    throw new Error(res.statusText);
-  }
-
-  return await res.json();
 }
 
 export default {
   name: 'ImageUpload',
   components: {
-    FileForm
+    FileForm,
+    MusicControls
   },
   methods: {
-    playImage
+    playImage,
+    resetState
   },
   data() {
     return {
       currentLabel: "Upload your image!",
-      formDisabled: false
+      formDisabled: false,
+      readyPlay: false
+    }
+  },
+  props: {
+    baseUrl: {
+      type: String,
+      required: true
+    },
+    classFromParent: {
+      type: String,
+      required: true
+    },
+    handleError: {
+      type: Function,
+      required: true
     }
   }
 }
