@@ -92,3 +92,69 @@ export default {
   }
 }
 </script>
+
+<style>
+  .button-group {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: stretch;
+    margin: 15px 50px;
+    box-shadow: 25px 10px 13px 2px rgba(60, 79, 94, 0.8);
+  }
+
+  .content-container {
+    display: flex;
+    flex-flow: column nowrap;
+  }
+
+  #selected-button {
+    flex: 1.5;
+    transition-property: flex;
+    transition-duration: 10ms;
+  }
+
+  .flex-button {
+    flex: 1;
+    background: #d7d9b1;
+    margin: 0 -15px;
+    padding: 0;
+    border: 3px solid black;
+    font-size: 7rem;
+    letter-spacing: 0.5rem;
+    font-variant-caps: small-caps;
+  }
+
+  .flex-button:hover {
+    background: #827191;
+    cursor: pointer;
+  }
+
+  .flex-button:focus {
+    background: #84acce !important;
+  }
+
+  .flex-button:first-of-type {
+    border-left: 0;
+  }
+
+  .flex-button:last-of-type {
+    border-right: 0;
+  }
+
+  .interactive-container {
+    display: flex;
+    flex: 1 0 50%;
+    justify-content: flex-start;
+    align-items: center;
+    flex-flow: column nowrap;
+    background: #b0cadf;
+    border-radius: 3rem;
+/*    margin: 2rem 10rem; */
+  }
+
+  .interactive-item {
+    background: #d7d9b1;
+    margin: 10rem 4rem 0 4rem;
+  }
+</style>
