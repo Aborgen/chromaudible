@@ -1,3 +1,12 @@
+const StatusEnum = Object.freeze(
+  {
+    'NOT_STARTED' : 1,
+    'PLAYING': 2,
+    'PAUSED': 3,
+    'FINISHED': 4
+  }
+);
+
 class MusicPlayer {
   constructor(context, frequencyTimePairs, gainTimePairs, timbreTexture, cleanupFunction) {
     this.context = context;
@@ -9,7 +18,7 @@ class MusicPlayer {
     this.queuedGainChange = [];
     this.scheduleAhead = 0.1/*s*/;
     this.cooldownPeriod = 25/*ms*/;
-    this.isFinished = false;
+    this.status = StatusEnum.NOT_STARTED;
     this.notePtr = 0;
     this.gainPtr = 0;
     [this.instrument, this.gainNode] = this.initInstrument();
@@ -61,7 +70,7 @@ class MusicPlayer {
 
   nextNote() {
     if (this.notePtr >= this.frequencyTimePairs.length - 1) {
-      this.isFinished = true;
+      this.status === StatusEnum.FINISHED;
       return [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
     }
 
@@ -79,7 +88,8 @@ class MusicPlayer {
   // Based on Chris Wilson's metronome scheduler:
   // https://www.html5rocks.com/en/tutorials/audio/scheduling/
   scheduler() {
-    if (this.isFinished) {
+    if (this.status === StatusEnum.PAUSED ||
+        this.status === StatusEnum.FINISHED) {
       return;
     }
 
@@ -98,8 +108,10 @@ class MusicPlayer {
     }
     // Context is suspended at construction, freezing currentTime at 0,
     // and enabling scheduling of notes at 0 seconds.
-    if (this.context.state === 'suspended') {
+    if (this.status === StatusEnum.NOT_STARTED) {
+      this.instrumentOn();
       this.context.resume();
+      this.status = StatusEnum.PLAYING;
     }
 
     this.lastFrequencyPair = [timestamp, hz];
@@ -125,4 +137,4 @@ class MusicPlayer {
   }
 }
 
-export default MusicPlayer;
+export { MusicPlayer, StatusEnum };
