@@ -150,3 +150,9 @@ export default {
 }
 </script>
 
+<style scoped>
+  .audio-upload_form {
+    flex: 0 0 5%;
+    border: 2px solid black;
+  }
+</style>
