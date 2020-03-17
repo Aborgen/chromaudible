@@ -6,6 +6,7 @@ from .exceptions.UnsupportedMediaType import UnsupportedMediaType
 from flask import Flask
 from flask import jsonify
 from flask import request
+import magic
 import os
 from tempfile import mkstemp
 from .transform import fromAudio
@@ -21,9 +22,12 @@ app = Flask(__name__)
 def upload():
   uploadType = request.form.get('type').lower()
   f = request.files['file']
-  fileBase, _ = f.filename.split('.')
-  fileIn = saveFile(f, f"{fileBase}_in")
+  actualType = getFileType(f, uploadType)
+  if uploadType != actualType:
+    raise UnprocessableEntity(f'File type is inconsistent: (Expected: {uploadType}, Got: {actualType})')
   if uploadType == EType.AUDIO.value:
+    fileBase, _ = f.filename.split('.')
+    fileIn = saveFile(f, f"{fileBase}_in")
     return prepareJSON(fromAudio(fileIn))
   elif uploadType == EType.IMAGE.value:
     return prepareJSON(fromImage(f))
@@ -48,7 +52,18 @@ def saveFile(f, filename: str) -> str:
   f.save(tempFile)
   os.close(fileDiscriptor)
   return tempFile
-  
+
+def getFileType(f, fileType: str) -> str:
+  f.seek(0)
+  mimeType = ''
+  if f.filename.split('.')[-1] == 'mp3':
+    mimeType = magic.from_buffer(f.read(), mime=True)
+  else:
+    mimeType = magic.from_buffer(f.read(2048), mime=True)
+
+  f.seek(0)
+  return mimeType.split('/')[0]
+
 def prepareJSON(responseBundle: dict):
   return jsonify(responseBundle)
 
