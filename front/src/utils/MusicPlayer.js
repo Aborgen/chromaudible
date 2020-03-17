@@ -130,9 +130,45 @@ class MusicPlayer {
     }, 1000);
   }
 
+  toggle() {
+    switch (true) {
+      case this.status === StatusEnum.PAUSED:
+        this.play();
+        break;
+      case this.status === StatusEnum.PLAYING:
+        this.pause();
+        break;
+      case this.status === StatusEnum.FINISHED:
+        // Fall through
+      default:
+        break;
+    }
+  }
+
+  pause() {
+    if (this.status === StatusEnum.PAUSED) {
+      return;
+    }
+
+    this.status = StatusEnum.PAUSED;
+    this.context.suspend();
+  }
+
   play() {
-    this.instrumentOn();
-    this.scheduler();
+    // There are some special considerations within scheduler when MusicPlayer
+    // has not yet been started (ensure notes at 0 seconds get scheduled).
+    if (this.status === StatusEnum.NOT_STARTED) {
+      this.scheduler();
+    }
+    else if (this.status === StatusEnum.PLAYING) {
+      return;
+    }
+    else {
+      this.status = StatusEnum.PLAYING;
+      this.context.resume();
+      this.scheduler();
+    }
+
     return;
   }
 }
