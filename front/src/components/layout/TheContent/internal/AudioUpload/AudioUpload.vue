@@ -1,10 +1,13 @@
 <template>
-<section class='audioUpload'>
+<section class='audio-upload'
+         :class='classFromParent'
+>
   <file-form
     :handle-submit='convertToImage'
     :input-label='currentLabel'
     :form-disabled='formDisabled'
-    form-name='audioUpload'
+    accepted-types='audio/*'
+    form-name='audio-upload'
   />
   <canvas-save v-if='canvasMounted === true'
                :width=500
