@@ -1,6 +1,8 @@
 from .config import tempDir
 from enum import Enum
 from .exceptions.NotFound import NotFound
+from .exceptions.UnprocessableEntity import UnprocessableEntity
+from .exceptions.UnsupportedMediaType import UnsupportedMediaType
 from flask import Flask
 from flask import jsonify
 from flask import request
@@ -29,10 +31,10 @@ def upload():
     msg = ''
     if not uploadType:
       msg = "To call this route, there must be an argument provided to type [type=audio|image]"
+      raise NotFound(msg)
     else:
       msg = f"The upload type {uploadType} is not supported"
-
-    raise NotFound(msg)
+      raise UnsupportedMediaType(msg)
 
 @app.after_request
 def after_request(response):
@@ -51,7 +53,9 @@ def prepareJSON(responseBundle: dict):
   return jsonify(responseBundle)
 
 @app.errorhandler(NotFound)
-def handleNotFound(error):
+@app.errorhandler(UnprocessableEntity)
+@app.errorhandler(UnsupportedMediaType)
+def handleError(error):
   response = prepareJSON(error.toDict())
   response.status_code = error.statusCode
   return response
