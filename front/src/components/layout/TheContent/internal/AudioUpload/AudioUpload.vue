@@ -20,6 +20,7 @@
 
 <script>
 import CanvasSave from 'components/CanvasSave/CanvasSave';
+import fetchCatch from 'utils/FetchCatch';
 import FileForm from 'components/FileForm/FileForm';
 import { spiral, calculateSpiralPeak } from 'utils/Spiral';
 
@@ -48,7 +49,7 @@ async function getColors(url, audioFile) {
   let data = new FormData();
   data.append('type', 'audio');
   data.append('file', audioFile);
-  return await fetch(url, {
+  return await fetchCatch(url, {
     method: 'POST',
     body: data
   });
