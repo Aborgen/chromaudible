@@ -1,10 +1,13 @@
 <template>
-<section class='interative-item image-upload'>
+<section class='image-upload'
+         :class='classFromParent'
+>
   <file-form
     :handle-submit='playImage'
     :input-label='currentLabel'
     :form-disabled='formDisabled'
-    form-name='imageUpload'
+    accepted-types='image/*'
+    form-name='image-upload'
   />
 </section>
 </template>
@@ -73,10 +76,8 @@ export default {
 </script>
 
 <style scoped>
-  .image-upload {
-    display: flex;
-    flex-flow: column nowrap;
-    width: 70%;
-    height: 80%;
+  .image-upload_form {
+    flex: 0 0 5%;
+    border: 2px solid black;
   }
 </style>
