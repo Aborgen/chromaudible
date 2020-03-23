@@ -146,7 +146,7 @@ class MusicPlayer {
   }
 
   pause() {
-    if (this.status === StatusEnum.PAUSED) {
+    if (this.status === StatusEnum.NOT_STARTED || this.status === StatusEnum.PAUSED) {
       return;
     }
 
