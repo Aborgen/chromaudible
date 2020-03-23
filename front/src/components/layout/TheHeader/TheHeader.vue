@@ -41,7 +41,7 @@ export default {
   border-top: none;
   border-bottom: none;
   letter-spacing: 0.25rem;
-  text-shadow: 4px 2px #af7000;
+  text-shadow: 0.25rem 0.05rem #af7000;
 }
 
 </style>

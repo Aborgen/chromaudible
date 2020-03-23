@@ -9,9 +9,7 @@
     accepted-types='audio/*'
     form-name='audio-upload'
   />
-  <canvas-save v-if='canvasMounted === true'
-               :width=500
-               :height=500
+  <canvas-save v-if='canvasMounted'
                :draw-function='canvasDrawFunction'
                :download-props="{ name: 'audio-canvas', text: 'Download Audio Canvas' }"
     />
@@ -152,7 +150,5 @@ export default {
 
 <style scoped>
   .audio-upload_form {
-    flex: 0 0 5%;
-    border: 2px solid black;
   }
 </style>

@@ -10,7 +10,7 @@
     form-name='image-upload'
   />
   <music-controls v-if='readyPlay'
-    :alertWhenFinished='resetState.bind(this)'
+    :alertParentDone='resetState.bind(this)'
     :melodyParts='melodyParts' />
 </section>
 </template>
@@ -96,7 +96,8 @@ export default {
     return {
       currentLabel: "Upload your image!",
       formDisabled: false,
-      readyPlay: false
+      readyPlay: false,
+      melodyParts: {}
     }
   },
   props: {
@@ -118,7 +119,5 @@ export default {
 
 <style scoped>
   .image-upload_form {
-    flex: 0 0 5%;
-    border: 2px solid black;
   }
 </style>

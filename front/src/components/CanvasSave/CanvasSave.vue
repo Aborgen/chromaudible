@@ -1,6 +1,6 @@
 <template>
 <section class='canvas-download'>
-  <canvas id='canvas-view' :width='width' :height='height'></canvas>
+  <canvas id='canvas-view'></canvas>
   <canvas id='real-canvas'></canvas>
   <a id='canvas-anchor' :download="downloadProps.name + '.png'">{{ downloadProps.text }}</a>
 </section>
@@ -16,6 +16,8 @@ function drawCanvas(drawFunction) {
 
 function generateThumbnail(canvas) {
   const thumbnail = document.getElementById('canvas-view');
+  thumbnail.width = 500;
+  thumbnail.height = 500;
   thumbnail.getContext('2d').drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, thumbnail.width, thumbnail.height);
 }
 
@@ -35,15 +37,7 @@ export default {
     downloadProps: {
       type: Object,
       required: true
-    },
-    width: {
-      type: Number,
-      required: true
-    },
-    height: {
-      type: Number,
-      required: true
-    },
+    }
   },
   mounted() {
     drawCanvas(this.drawFunction);
@@ -53,12 +47,16 @@ export default {
 
 <style scoped>
   #canvas-view {
-    border: 2px solid #000000;
+    border: 0.5rem outset #816c61;
+    box-shadow: 0.8rem 0.5rem 0.5rem -0.2rem #2E0303;
     display: block;
+    height: 40rem;
+    width: 40rem;
+    margin: 1rem 0;
   }
 
   #real-canvas {
-    border: 2px solid #000000;
+    border: 0.18rem solid #000000;
     display: none;
   }
 

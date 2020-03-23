@@ -20,12 +20,13 @@ export default {
 
 <style>
 html, body {
-  height: 80rem;
+  height: 100vh;
   width: 100%;
   padding: 0;
   margin: 0;
   background: #7d1d3f;
   color: #3c4f5e;
+  font-size: 4px;
 }
 
 .app {
@@ -33,30 +34,35 @@ html, body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  font-size: 200px;
 }
 
-@media all and (max-width: 1000px) {
+@media (min-width: 330px) {
   html, body {
-    font-size: 10px;
+    font-size: 5px;
   }
 }
 
-@media all and (max-width:700px) {
+@media (min-width: 550px) {
   html, body {
-    font-size: 8px;
+    font-size: 6px;
   }
 }
 
-@media all and (max-width:500px) {
+@media (min-width: 768px) {
   html, body {
     font-size: 7px;
   }
 }
 
-@media all and (max-width:400px) {
+@media (min-width: 992px) {
   html, body {
-    font-size: 5px;
+    font-size: 8px;
+  }
+}
+
+@media (min-width: 1200px) {
+  html, body {
+    font-size: 10px;
   }
 }
 

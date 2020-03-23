@@ -2,11 +2,14 @@
 <section :class="classFromParent + ' content-container'">
   <section class='button-group'>
     <button class='flex-button' @click='setAudioMode'
-            :id='currentMode === ModeEnum.AUDIO && "selected-button"'>Audio</button>
+            id='flex-button__first'
+            :class='currentMode === ModeEnum.AUDIO && "selected-button"'>Audio</button>
     <button class='flex-button' @click='setImageMode'
-            :id='currentMode === ModeEnum.IMAGE && "selected-button"'>Image</button>
+            id='flex-button__second'
+            :class='currentMode === ModeEnum.IMAGE && "selected-button"'>Image</button>
   </section>
   <section class='interactive-container'>
+    <keep-alive>
     <audio-upload v-if             ="currentMode === ModeEnum.AUDIO"
                   :base-url        ='baseUrl'
                   :handle-error    ='handleError'
@@ -17,6 +20,7 @@
                   :handle-error    ='handleError'
                   class-from-parent='interactive-item'
     />
+    </keep-alive>
   </section>
 </section>
 </template>
@@ -71,7 +75,7 @@ export default {
   },
   data: function() {
     return {
-      baseUrl: 'http://localhost:5000',
+      baseUrl: 'http://192.168.86.58:5000',
       currentMode: ModeEnum.AUDIO,
       ModeEnum,
       lastHTTPCode: 0,
@@ -97,64 +101,84 @@ export default {
   .button-group {
     display: flex;
     flex-flow: row nowrap;
-    justify-content: space-between;
+    justify-content: stretch;
     align-items: stretch;
-    margin: 15px 50px;
-    box-shadow: 25px 10px 13px 2px rgba(60, 79, 94, 0.8);
+    margin: 1rem 3rem;
   }
 
   .content-container {
     display: flex;
     flex-flow: column nowrap;
+    height: 100%;
   }
 
-  #selected-button {
-    flex: 1.5;
-    transition-property: flex;
-    transition-duration: 10ms;
+  .selected-button {
+    flex: 1.1 !important;
+    top: -0.1rem !important;
+    transition: top 0.2s cubic-bezier(.23,1,.32,1);
+    transition: flex 0.2s cubic-bezier(.23,1,.32,1);
+    z-index: 2;
+  }
+
+  #flex-button__first.selected-button {
+    box-shadow: 0.8rem 0.8rem 1rem -0.2rem #2E0303;
+  }
+
+  #flex-button__second.selected-button {
+    box-shadow: -0.8rem 0.8rem 1rem -0.2rem #2E0303;
   }
 
   .flex-button {
+    display: block;
     flex: 1;
     background: #d7d9b1;
-    margin: 0 -15px;
-    padding: 0;
-    border: 3px solid black;
+    padding: 4rem;
+    margin: 0;
+    border: 0.2rem solid black;
     font-size: 7rem;
     letter-spacing: 0.5rem;
     font-variant-caps: small-caps;
+    position: relative;
+    top: 0;
+    cursor: pointer;
+    box-sizing: border-box;
+    line-height: 7rem;
   }
 
   .flex-button:hover {
     background: #827191;
-    cursor: pointer;
   }
 
   .flex-button:focus {
-    background: #84acce !important;
+    background: #84acce;
   }
 
-  .flex-button:first-of-type {
-    border-left: 0;
+  #flex-button__first {
+    border-left: 0 !important;
   }
 
-  .flex-button:last-of-type {
-    border-right: 0;
+  #flex-button__second {
+    border-right: 0 !important;
   }
 
   .interactive-container {
     display: flex;
-    flex: 1 0 50%;
-    justify-content: flex-start;
+    height: 100%;
     align-items: center;
+    justify-content: flex-start;
     flex-flow: column nowrap;
     background: #b0cadf;
     border-radius: 3rem;
-/*    margin: 2rem 10rem; */
+    margin: 1rem 7rem;
+    font-size: 1.5em
   }
 
   .interactive-item {
+    display: flex;
     background: #d7d9b1;
-    margin: 10rem 4rem 0 4rem;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    margin-top: 7rem;
   }
 </style>
