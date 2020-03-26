@@ -12,6 +12,7 @@ from tempfile import mkstemp
 from typing import List, Tuple
 from .transform import fromAudio
 from .transform import fromImage
+from werkzeug.exceptions import InternalServerError
 
 class EType(Enum):
   AUDIO = 'audio'
@@ -30,7 +31,12 @@ def upload():
   if uploadType == EType.AUDIO.value:
     fileBase, _ = f.filename.split('.')
     fileIn = saveFile(f, f"{fileBase}_in")
-    return prepareJSON(fromAudio(fileIn))
+    try:
+      colors = fromAudio(fileIn)
+      return prepareJSON(colors)
+    except:
+      raise UnprocessableEntity(f'Audio file is corrupted and cannot be loaded')
+
   elif uploadType == EType.IMAGE.value:
     return prepareJSON(fromImage(f))
   else:
@@ -77,4 +83,10 @@ def prepareJSON(responseBundle: dict):
 def handleError(error):
   response = prepareJSON(error.toDict())
   response.status_code = error.statusCode
+  return response
+
+@app.errorhandler(InternalServerError)
+def syntaxError(error):
+  response = prepareJSON({'message':'There is an issue with the server'})
+  response.status_code = 500
   return response
