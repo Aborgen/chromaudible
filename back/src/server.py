@@ -6,9 +6,10 @@ from .exceptions.UnsupportedMediaType import UnsupportedMediaType
 from flask import Flask
 from flask import jsonify
 from flask import request
-import magic
+from magic import Magic
 import os
 from tempfile import mkstemp
+from typing import List, Tuple
 from .transform import fromAudio
 from .transform import fromImage
 
@@ -22,9 +23,10 @@ app = Flask(__name__)
 def upload():
   uploadType = request.form.get('type').lower()
   f = request.files['file']
-  actualType = getFileType(f, uploadType)
-  if uploadType != actualType:
-    raise UnprocessableEntity(f'File type is inconsistent: (Expected: {uploadType}, Got: {actualType})')
+  correctFileType, typeOptions = examineFile(f, uploadType)
+  if not correctFileType:
+    raise UnprocessableEntity(f'File type is inconsistent: (Expected: {uploadType}, Got: {typeOptions[0]})')
+
   if uploadType == EType.AUDIO.value:
     fileBase, _ = f.filename.split('.')
     fileIn = saveFile(f, f"{fileBase}_in")
@@ -53,16 +55,18 @@ def saveFile(f, filename: str) -> str:
   os.close(fileDiscriptor)
   return tempFile
 
-def getFileType(f, fileType: str) -> str:
+def examineFile(f, fileType: str) -> Tuple[bool, List[str]]:
   f.seek(0)
-  mimeType = ''
-  if f.filename.split('.')[-1] == 'mp3':
-    mimeType = magic.from_buffer(f.read(), mime=True)
-  else:
-    mimeType = magic.from_buffer(f.read(2048), mime=True)
+  magic = Magic(mime=True, keep_going=True)
+  mimetype = magic.from_buffer(f.read(2048)).split('/')[0]
+  # Mp3 files pose interesting problems in mimetype detection
+  if f.filename.split('.')[-1] == 'mp3' and mimetype != 'audio':
+    mimetype = 'audio'
 
   f.seek(0)
-  return mimeType.split('/')[0]
+  types = [mimetype, f.mimetype.split('/')[0]]
+  status = all(fileType == x for x in types)
+  return (status, types)
 
 def prepareJSON(responseBundle: dict):
   return jsonify(responseBundle)
