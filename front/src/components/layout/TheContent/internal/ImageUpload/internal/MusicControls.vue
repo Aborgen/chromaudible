@@ -124,11 +124,16 @@ export default {
   }
 
   .music-controls__display {
+    display: flex;
     background: #131b23;
     flex: 1;
+    align-items: center;
+    justify-content: center;
     border: 0.25rem inset #816c61;
     padding: 0.5rem 2rem;
     word-break: break-word;
+    box-sizing: border-box;
+    min-height: 10rem;
   }
 
   .music-controls__button-group {
