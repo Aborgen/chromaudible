@@ -70,7 +70,7 @@ class MusicPlayer {
 
   nextNote() {
     if (this.notePtr >= this.frequencyTimePairs.length - 1) {
-      this.status === StatusEnum.FINISHED;
+      this.status = StatusEnum.FINISHED;
       return [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
     }
 
@@ -146,7 +146,7 @@ class MusicPlayer {
   }
 
   pause() {
-    if (this.status === StatusEnum.NOT_STARTED || this.status === StatusEnum.PAUSED) {
+    if (this.status === StatusEnum.NOT_STARTED || this.status === StatusEnum.PAUSED || this.status === StatusEnum.FINISHED) {
       return;
     }
 
@@ -160,7 +160,7 @@ class MusicPlayer {
     if (this.status === StatusEnum.NOT_STARTED) {
       this.scheduler();
     }
-    else if (this.status === StatusEnum.PLAYING) {
+    else if (this.status === StatusEnum.PLAYING || this.status === StatusEnum.FINISHED) {
       return;
     }
     else {

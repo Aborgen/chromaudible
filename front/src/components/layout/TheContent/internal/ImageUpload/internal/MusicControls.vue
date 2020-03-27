@@ -65,6 +65,7 @@ function init() {
   gain.connect(context.destination);
   this.player = new MusicPlayer(context, melody, volumeChanges, timbreTexture, () => {
     this.displayText = 'Finished';
+    this.canPlay = false;
     this.alertParentDone();
   });
 }
