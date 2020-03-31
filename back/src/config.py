@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from shutil import rmtree
 
-tempDir = Path("../temp")
+tempDir = Path("temp")
 sampleRate = 44100
 denormalizeRgbPasses = 5
 melodyBounds = {
