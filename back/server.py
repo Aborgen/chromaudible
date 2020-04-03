@@ -40,9 +40,7 @@ async def upload(request):
       colors = fromAudio(fileIn)
       return prepareJSON(colors)
     except Exception as e:
-      raise UnprocessableEntity(e.message)
-
-#      raise UnprocessableEntity(f'Audio file is corrupted and cannot be loaded')
+      raise UnprocessableEntity(f'Audio file is corrupted and cannot be loaded')
 
   elif uploadType == EType.IMAGE.value:
     return prepareJSON(fromImage(f.file))

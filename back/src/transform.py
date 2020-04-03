@@ -46,7 +46,7 @@ def fromImage(f: FileStorage):
 # Use spleeter to separate audio file into vocals and drums, and then
 # return those same wavelengths
 def isolateAudio(tempFile: str, outDir: Path) -> Tuple[np.ndarray, np.ndarray]:
-  separator = Separator('spleeter:4stems', stft_backend='librosa')
+  separator = Separator('spleeter:4stems', stft_backend='tensorflow')
   separator.separate_to_file(tempFile, outDir, filename_format='{instrument}.{codec}')
 
   vocals, _ = librosa.load(outDir / 'vocals.wav', sampleRate, mono=True)
