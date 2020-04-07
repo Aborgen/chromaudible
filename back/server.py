@@ -81,8 +81,3 @@ def handleError(request, error):
   response.status_code = error.statusCode
   return response
 
-#@app.errorhandler(InternalServerError)
-#def syntaxError(error):
-#  response = prepareJSON({'message':'There is an issue with the server'})
-#  response.status_code = 500
-#  return response
