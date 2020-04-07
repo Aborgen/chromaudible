@@ -75,7 +75,7 @@ export default {
   },
   data: function() {
     return {
-      baseUrl: 'http://192.168.86.58:5000',
+      baseUrl: `${process.env.VUE_APP_SERVER_ADDRESS}:${process.env.VUE_APP_SERVER_PORT}`,
       currentMode: ModeEnum.AUDIO,
       ModeEnum,
       lastHTTPCode: 0,
