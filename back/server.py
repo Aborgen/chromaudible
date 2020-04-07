@@ -3,17 +3,16 @@ from enum import Enum
 from src.exceptions.NotFound import NotFound
 from src.exceptions.UnprocessableEntity import UnprocessableEntity
 from src.exceptions.UnsupportedMediaType import UnsupportedMediaType
-from magic import Magic
-import os
 from starlette.applications import Starlette
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from starlette.routing import Route
-from tempfile import mkstemp
 from typing import List, Tuple
 from src.transform import fromAudio
 from src.transform import fromImage
+from src.utils import examineFile
+from src.utils import saveFile
 
 class EType(Enum):
   AUDIO = 'audio'
@@ -38,12 +37,12 @@ async def upload(request):
     fileIn = saveFile(await f.read())
     try:
       colors = fromAudio(fileIn)
-      return prepareJSON(colors)
+      return JSONResponse(colors)
     except Exception as e:
       raise UnprocessableEntity(f'Audio file is corrupted and cannot be loaded')
 
   elif uploadType == EType.IMAGE.value:
-    return prepareJSON(fromImage(f.file))
+    return JSONResponse(fromImage(f.file))
   else:
     msg = ''
     if not uploadType:
@@ -53,38 +52,18 @@ async def upload(request):
       msg = f"The upload type {uploadType} is not supported"
       raise UnsupportedMediaType(msg)
 
-def saveFile(f) -> str:
-  fileDiscriptor, path = mkstemp(dir=tempDir)
-  with open(path, 'w+b') as tempfile:
-    tempfile.write(f)
 
   os.close(fileDiscriptor)
   return path
 
-async def examineFile(f, fileType: str) -> Tuple[bool, List[str]]:
-  await f.seek(0)
-  magic = Magic(mime=True, keep_going=True)
-  # Mp3 files pose interesting problems in mimetype detection. Let the audio
-  # loading mechanism tell us if it actually is audio.
-  if f.filename.split('.')[-1] == 'mp3':
-    typeGuess = typeIncluded = 'audio'
-  else:
-    typeGuess = magic.from_buffer(await f.read(2048)).split('/')[0]
-    typeIncluded = f.content_type.split('/')[0]
 
-  await f.seek(0)
-  types = [typeGuess, typeIncluded]
-  status = all(fileType == mimetype for mimetype in types)
-  return (status, types)
 
-def prepareJSON(responseBundle: dict):
-  return JSONResponse(responseBundle)
 
 @app.exception_handler(NotFound)
 @app.exception_handler(UnprocessableEntity)
 @app.exception_handler(UnsupportedMediaType)
 def handleError(request, error):
-  response = prepareJSON(error.toDict())
+  response = JSONResponse(error.toDict())
   response.status_code = error.statusCode
   return response
 
