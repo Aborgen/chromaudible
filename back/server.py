@@ -4,10 +4,14 @@ from src.exceptions.NotFound import NotFound
 from src.exceptions.UnprocessableEntity import UnprocessableEntity
 from src.exceptions.UnsupportedMediaType import UnsupportedMediaType
 from starlette.applications import Starlette
+from starlette.config import Config
 from starlette.middleware import Middleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
+from starlette.responses import PlainTextResponse
+from starlette.routing import Mount
 from starlette.routing import Route
+from starlette.staticfiles import StaticFiles
 from typing import List, Tuple
 from src.transform import fromAudio
 from src.transform import fromImage
@@ -18,13 +22,6 @@ class EType(Enum):
   AUDIO = 'audio'
   IMAGE = 'image'
 
-middleware = [
-    Middleware(CORSMiddleware, allow_origins=['*'])
-]
-
-app = Starlette(debug=True, middleware=middleware)
-
-@app.route('/upload', methods=['POST'])
 async def upload(request):
   form = await request.form()
   uploadType = form['type']
@@ -53,11 +50,28 @@ async def upload(request):
       raise UnsupportedMediaType(msg)
 
 
-  os.close(fileDiscriptor)
-  return path
+config = Config('.env')
+debug = config('DEBUG', cast=bool, default=False)
+environment = config('UVICORN_ENV', cast=str, default='development')
+if environment == 'production':
+  cors = Middleware(CORSMiddleware, allow_origins=['https://0.0.0.0:80'])
+  homepage = Mount('/', StaticFiles(directory='dist', html=True))
+elif environment == 'development':
+  cors = Middleware(CORSMiddleware, allow_origins=['*'])
+  homepage = Route('/', PlainTextResponse('Hello! You are running the server in development mode!'))
+else:
+  homepage = Route('/', PlainTextResponse('$UNICORN_ENV environment variable is unset'))
 
+routes = [
+  Route('/upload', upload, methods=['POST']),
+  homepage
+]
 
+middleware = [
+  cors
+]
 
+app = Starlette(debug=debug, routes=routes, middleware=middleware)
 
 @app.exception_handler(NotFound)
 @app.exception_handler(UnprocessableEntity)
