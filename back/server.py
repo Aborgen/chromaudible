@@ -50,17 +50,8 @@ async def upload(request):
       raise UnsupportedMediaType(msg)
 
 
-config = Config('.env')
-debug = config('DEBUG', cast=bool, default=False)
-environment = config('UVICORN_ENV', cast=str, default='development')
-if environment == 'production':
-  cors = Middleware(CORSMiddleware, allow_origins=['https://0.0.0.0:80'])
-  homepage = Mount('/', StaticFiles(directory='dist', html=True))
-elif environment == 'development':
-  cors = Middleware(CORSMiddleware, allow_origins=['*'])
-  homepage = Route('/', PlainTextResponse('Hello! You are running the server in development mode!'))
-else:
-  homepage = Route('/', PlainTextResponse('$UNICORN_ENV environment variable is unset'))
+cors = Middleware(CORSMiddleware, allow_origins=['http://localhost:8000'])
+homepage = Mount('/', StaticFiles(directory='dist', html=True))
 
 routes = [
   Route('/upload', upload, methods=['POST']),
@@ -71,7 +62,7 @@ middleware = [
   cors
 ]
 
-app = Starlette(debug=debug, routes=routes, middleware=middleware)
+app = Starlette(routes=routes, middleware=middleware)
 
 @app.exception_handler(NotFound)
 @app.exception_handler(UnprocessableEntity)
