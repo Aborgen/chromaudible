@@ -8,5 +8,5 @@ module.exports = {
       }
     }
   },
-  outputDir: path.resolve(__dirname, '../deploy/dist')
+  outputDir: path.resolve(__dirname, '../build/dist')
 }

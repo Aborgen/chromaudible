@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-outDir=./deploy
+outDir=./build
 
 serverDir=back/
 vueDir=front/
