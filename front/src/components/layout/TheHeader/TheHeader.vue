@@ -1,6 +1,6 @@
 <template>
 <section :class="classFromParent + ' header-container'">
-  <div class='header-item logo'>Chromeaudible</div>
+  <div class='header-item logo'>Chromaudible</div>
 </section>
 </template>
 
